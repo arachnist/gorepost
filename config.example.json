@@ -1,0 +1,10 @@
+{
+ "Nick":"gorepost",
+ "Host":"my.hostname",
+ "Networks":["freenode", "ircnet"],
+ "Servers":{"freenode":["chat.freenode.net"], "ircnet":["openirc.snt.utwente.nl"]},
+ "Channels":{"freenode":["#repost-test"], "ircnet":["#nowyrok"]},
+ "Passwords":{},
+ "Plugins":[],
+ "Ignore":[]
+}
