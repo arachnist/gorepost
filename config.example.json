@@ -12,5 +12,6 @@
  },
  "Passwords":{},
  "Plugins":[],
- "Ignore":[]
+ "Ignore":[],
+ "Logpath":"/home/gorepost/.gorepost/gorepost.log"
 }
