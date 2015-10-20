@@ -41,6 +41,7 @@ func (c *Connection) Receiver() {
 		if err != nil {
 			log.Println(c.Network, "error reading message", err.Error())
 		}
+        log.Println(c.Network, "<-- RAW", raw)
 		msg, err := ParseMessage(raw)
 		if err != nil {
 			log.Println(c.Network, "error decoding message", err.Error())
