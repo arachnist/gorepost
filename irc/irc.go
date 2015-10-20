@@ -59,6 +59,13 @@ func (c Connection) Receiver() {
 	}
 }
 
+func (c Connection) Dispatcher() {
+	for {
+		// just sink everything for now
+		<-c.Output
+	}
+}
+
 func (c Connection) Dial(server string, nick string, user string, realname string) error {
 
 	conn, err := net.Dial("tcp", server)
@@ -74,6 +81,7 @@ func (c Connection) Dial(server string, nick string, user string, realname strin
 
 	go c.Sender()
 	go c.Receiver()
+	go c.Dispatcher()
 
 	log.Println(c.Network, "Initializing IRC connection")
 	c.Input <- Message{
