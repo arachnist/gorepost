@@ -20,7 +20,8 @@ type Connection struct {
 	QuitRecv chan struct{}
 }
 
-func (c *Connection) Sender() {
+func (c Connection) Sender() {
+	log.Println(c.Network, "Spawned sender loop")
 	for {
 		select {
 		case msg := <-c.Input:
@@ -35,7 +36,8 @@ func (c *Connection) Sender() {
 	}
 }
 
-func (c *Connection) Receiver() {
+func (c Connection) Receiver() {
+	log.Println(c.Network, "Spawned receiver loop")
 	for {
 		raw, err := c.Reader.ReadString(delim)
 		if err != nil {
@@ -57,7 +59,7 @@ func (c *Connection) Receiver() {
 	}
 }
 
-func (c *Connection) Dial(server string) error {
+func (c Connection) Dial(server string) error {
 
 	conn, err := net.Dial("tcp", server)
 	if err != nil {
@@ -66,9 +68,7 @@ func (c *Connection) Dial(server string) error {
 	}
 	log.Println(c.Network, "Connected to", server)
 	c.Writer = bufio.NewWriter(conn)
-	log.Println(c.Network, "Spawned bufio writer")
 	c.Reader = bufio.NewReader(conn)
-	log.Println(c.Network, "Spawned bufio reader")
 
 	go c.Sender()
 	go c.Receiver()
