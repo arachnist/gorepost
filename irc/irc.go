@@ -62,9 +62,11 @@ func (c *Connection) Dial(server string) error {
 		log.Println(c.Network, "Cannot connect to", server, "error:", err.Error())
 		return err
 	}
-    log.Println(c.Network, "Connected to", server)
+	log.Println(c.Network, "Connected to", server)
 	c.Writer = bufio.NewWriter(conn)
+	log.Println(c.Network, "Spawned bufio writer")
 	c.Reader = bufio.NewReader(conn)
+	log.Println(c.Network, "Spawned bufio reader")
 
 	go c.Sender()
 	go c.Receiver()
