@@ -59,9 +59,10 @@ func (c *Connection) Dial(server string) error {
 
 	conn, err := net.Dial("tcp", server)
 	if err != nil {
-		log.Println("Cannot connect to", server, "error:", err.Error())
+		log.Println(c.Network, "Cannot connect to", server, "error:", err.Error())
 		return err
 	}
+    log.Println(c.Network, "Connected to", server)
 	c.Writer = bufio.NewWriter(conn)
 	c.Reader = bufio.NewReader(conn)
 
