@@ -59,7 +59,7 @@ func (c Connection) Receiver() {
 	}
 }
 
-func (c Connection) Dial(server string) error {
+func (c Connection) Dial(server string, nick string, user string, realname string) error {
 
 	conn, err := net.Dial("tcp", server)
 	if err != nil {
@@ -72,6 +72,17 @@ func (c Connection) Dial(server string) error {
 
 	go c.Sender()
 	go c.Receiver()
+
+    log.Println(c.Network, "Initializing IRC connection")
+        c.Input <- Message{
+            Command:    "NICK",
+            Trailing:   nick,
+        }
+        c.Input <- Message{
+            Command:    "USER",
+            Params:     []string{user, "0", "*"},
+            Trailing:   realname,
+        }
 
 	return nil
 }

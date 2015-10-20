@@ -31,8 +31,9 @@ func main() {
 	for i, conn := range connections {
 		network := config.Networks[i]
 		server := config.Servers[network][rand.Intn(len(config.Servers[network]))]
+		log.Println(network, server)
 		conn.Network = config.Networks[i]
-		conn.Dial(server)
+		conn.Dial(server, config.Nick, config.User, config.RealName)
 	}
 	<-exit
 }
