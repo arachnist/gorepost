@@ -69,20 +69,22 @@ func (c Connection) Dial(server string, nick string, user string, realname strin
 	log.Println(c.Network, "Connected to", server)
 	c.Writer = bufio.NewWriter(conn)
 	c.Reader = bufio.NewReader(conn)
+	c.Input = make(chan Message, 1)
+	c.Output = make(chan Message, 1)
 
 	go c.Sender()
 	go c.Receiver()
 
-    log.Println(c.Network, "Initializing IRC connection")
-        c.Input <- Message{
-            Command:    "NICK",
-            Trailing:   nick,
-        }
-        c.Input <- Message{
-            Command:    "USER",
-            Params:     []string{user, "0", "*"},
-            Trailing:   realname,
-        }
+	log.Println(c.Network, "Initializing IRC connection")
+	c.Input <- Message{
+		Command:  "NICK",
+		Trailing: nick,
+	}
+	c.Input <- Message{
+		Command:  "USER",
+		Params:   []string{user, "0", "*"},
+		Trailing: realname,
+	}
 
 	return nil
 }
