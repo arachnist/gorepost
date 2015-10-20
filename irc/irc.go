@@ -7,8 +7,7 @@ import (
 )
 
 const delim byte = '\n'
-
-var endline = []byte("\r\n")
+const endline string = "\r\n"
 
 type Connection struct {
 	Network  string
@@ -25,8 +24,9 @@ func (c Connection) Sender() {
 	for {
 		select {
 		case msg := <-c.Input:
-			c.Writer.WriteString(msg.String())
+			c.Writer.WriteString(msg.String() + endline)
 			log.Println(c.Network, "-->", msg.String())
+			c.Writer.Flush()
 		case <-c.QuitSend:
 			log.Println(c.Network, "closing Sender")
 			close(c.Input)
