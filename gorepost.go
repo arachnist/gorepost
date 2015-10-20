@@ -12,7 +12,9 @@ import (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	config, err := config.ReadConfig(os.Args[1])
+	var exit chan struct{}
 	if err != nil {
 		fmt.Println("Error reading configuration from", os.Args[1], "error:", err.Error())
 		os.Exit(1)
@@ -25,4 +27,12 @@ func main() {
 	}
 	log.SetOutput(logfile)
 
+	connections := make([]irc.Connection, len(config.Networks))
+	for i, conn := range connections {
+		network := config.Networks[i]
+		server := config.Servers[network][rand.Intn(len(config.Servers[network]))]
+		conn.Network = config.Networks[i]
+		conn.Dial(server)
+	}
+	<-exit
 }
