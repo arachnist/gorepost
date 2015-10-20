@@ -25,6 +25,7 @@ func (c *Connection) Sender() {
 		select {
 		case msg := <-c.Input:
 			c.Writer.WriteString(msg.String())
+            log.Println(c.Network, "-->", msg.String())
 		case <-c.QuitSend:
 			log.Println(c.Network, "closing Sender")
 			close(c.Input)
@@ -46,6 +47,7 @@ func (c *Connection) Receiver() {
 		}
 		select {
 		case c.Output <- *msg:
+            log.Println(c.Network, "<--", msg.String())
 		case <-c.QuitRecv:
 			log.Println(c.Network, "closing receiver")
 			close(c.Output)
