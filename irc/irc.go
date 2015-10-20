@@ -25,7 +25,7 @@ func (c *Connection) Sender() {
 		select {
 		case msg := <-c.Input:
 			c.Writer.WriteString(msg.String())
-            log.Println(c.Network, "-->", msg.String())
+			log.Println(c.Network, "-->", msg.String())
 		case <-c.QuitSend:
 			log.Println(c.Network, "closing Sender")
 			close(c.Input)
@@ -41,14 +41,13 @@ func (c *Connection) Receiver() {
 		if err != nil {
 			log.Println(c.Network, "error reading message", err.Error())
 		}
-        log.Println(c.Network, "<-- RAW", raw)
 		msg, err := ParseMessage(raw)
 		if err != nil {
 			log.Println(c.Network, "error decoding message", err.Error())
 		}
+		log.Println(c.Network, "<--", msg.String())
 		select {
 		case c.Output <- *msg:
-            log.Println(c.Network, "<--", msg.String())
 		case <-c.QuitRecv:
 			log.Println(c.Network, "closing receiver")
 			close(c.Output)
