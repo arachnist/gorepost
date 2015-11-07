@@ -1,14 +1,16 @@
 {
  "Nick":"gorepost",
  "Host":"my.hostname",
+ "RealName":"I am an IRC bot!",
+ "User":"gorepost",
  "Networks":["freenode", "ircnet"],
  "Servers":{
-     "freenode":["chat.freenode.net"],
-     "ircnet":["openirc.snt.utwente.nl"]
+     "freenode":["chat.freenode.net:6667"],
+     "ircnet":["openirc.snt.utwente.nl:6667"]
  },
  "Channels":{
-     "freenode":["#repost-test"],
-     "ircnet":["#nowyrok"]
+     "freenode":["#gorepost-test"],
+     "ircnet":["#gorepost-test"]
  },
  "Passwords":{},
  "Plugins":[],
