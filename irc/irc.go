@@ -31,7 +31,7 @@ type Connection struct {
 }
 
 func (c *Connection) Sender() {
-	log.Println(c.Network, "Spawned sender loop")
+	log.Println(c.Network, "spawned Sender")
 	for {
 		select {
 		case msg := <-c.Input:
@@ -46,7 +46,7 @@ func (c *Connection) Sender() {
 }
 
 func (c *Connection) Receiver() {
-	log.Println(c.Network, "Spawned receiver loop")
+	log.Println(c.Network, "spawned Receiver")
 	for {
 		raw, err := c.Reader.ReadString(delim)
 		if err != nil {
@@ -92,7 +92,7 @@ func (c *Connection) Cleaner() {
 	log.Println(c.Network, "spawned Cleaner")
 	for {
 		<-c.Quit
-		log.Println(c.Network, "Received quit message")
+		log.Println(c.Network, "ceceived quit message")
 		c.m.Lock()
 		log.Println(c.Network, "cleaning up!")
 		c.QuitSend <- struct{}{}
@@ -146,9 +146,9 @@ func (c *Connection) Setup(network string, servers []string, nick string, user s
 	c.Nick = nick
 	c.User = user
 	c.RealName = realname
+	c.Network = network
 
 	c.Reconnect <- struct{}{}
-	c.Network = network
 	go c.Keeper(servers)
 	go c.Cleaner()
 	return
