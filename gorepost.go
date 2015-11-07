@@ -3,16 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
-	"time"
 
 	"github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
 	config, err := config.ReadConfig(os.Args[1])
 	var exit chan struct{}
 	if err != nil {
@@ -28,12 +25,9 @@ func main() {
 	log.SetOutput(logfile)
 
 	connections := make([]irc.Connection, len(config.Networks))
-	for i, conn := range connections {
+	for i, _ := range connections {
 		network := config.Networks[i]
-		server := config.Servers[network][rand.Intn(len(config.Servers[network]))]
-		log.Println(network, server)
-		conn.Network = config.Networks[i]
-		conn.Dial(server, config.Nick, config.User, config.RealName)
+		connections[i].Setup(network, config.Servers[network], config.Nick, config.User, config.RealName)
 	}
 	<-exit
 }
