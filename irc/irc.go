@@ -19,7 +19,7 @@ type Connection struct {
 	QuitRecv chan struct{}
 }
 
-func (c Connection) Sender() {
+func (c *Connection) Sender() {
 	log.Println(c.Network, "Spawned sender loop")
 	for {
 		select {
@@ -36,7 +36,7 @@ func (c Connection) Sender() {
 	}
 }
 
-func (c Connection) Receiver() {
+func (c *Connection) Receiver() {
 	log.Println(c.Network, "Spawned receiver loop")
 	for {
 		raw, err := c.Reader.ReadString(delim)
@@ -59,14 +59,14 @@ func (c Connection) Receiver() {
 	}
 }
 
-func (c Connection) Dispatcher() {
+func (c *Connection) Dispatcher() {
 	for {
 		// just sink everything for now
 		<-c.Output
 	}
 }
 
-func (c Connection) Dial(server string, nick string, user string, realname string) error {
+func (c *Connection) Dial(server string, nick string, user string, realname string) error {
 
 	conn, err := net.Dial("tcp", server)
 	if err != nil {
