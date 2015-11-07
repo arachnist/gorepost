@@ -53,7 +53,7 @@ func (c *Connection) Receiver() {
 			log.Println(c.Network, "error reading message", err.Error())
 			log.Println(c.Network, "closing Receiver")
 			c.Quit <- struct{}{}
-			log.Println(c.Network, 1)
+			log.Println(c.Network, "sent quit message from Receiver")
 			return
 		}
 		msg, err := ParseMessage(raw)
@@ -61,7 +61,7 @@ func (c *Connection) Receiver() {
 			log.Println(c.Network, "error decoding message", err.Error())
 			log.Println(c.Network, "closing Receiver")
 			c.Quit <- struct{}{}
-			log.Println(c.Network, 2)
+			log.Println(c.Network, "sent quit message from Receiver")
 			return
 		} else {
 			log.Println(c.Network, "<--", msg.String())
@@ -70,7 +70,6 @@ func (c *Connection) Receiver() {
 		case c.Output <- *msg:
 		case <-c.QuitRecv:
 			log.Println(c.Network, "closing Receiver")
-			log.Println(c.Network, 3)
 			return
 		}
 	}
