@@ -19,14 +19,14 @@ type Connection struct {
 	RealName  string
 	Input     chan Message
 	Output    chan Message
-	Reader    *bufio.Reader
-	Writer    *bufio.Writer
+	reader    *bufio.Reader
+	writer    *bufio.Writer
 	conn      net.Conn
-	Reconnect chan struct{}
+	reconnect chan struct{}
 	Quit      chan struct{}
-	QuitSend  chan struct{}
-	QuitRecv  chan struct{}
-	L sync.Mutex
+	quitsend  chan struct{}
+	quitrecv  chan struct{}
+	l         sync.Mutex
 }
 
 func (c *Connection) Sender() {
@@ -34,10 +34,10 @@ func (c *Connection) Sender() {
 	for {
 		select {
 		case msg := <-c.Input:
-			c.Writer.WriteString(msg.String() + endline)
+			c.writer.WriteString(msg.String() + endline)
 			log.Println(c.Network, "-->", msg.String())
-			c.Writer.Flush()
-		case <-c.QuitSend:
+			c.writer.Flush()
+		case <-c.quitsend:
 			log.Println(c.Network, "closing Sender")
 			return
 		}
@@ -47,7 +47,7 @@ func (c *Connection) Sender() {
 func (c *Connection) Receiver() {
 	log.Println(c.Network, "spawned Receiver")
 	for {
-		raw, err := c.Reader.ReadString(delim)
+		raw, err := c.reader.ReadString(delim)
 		if err != nil {
 			log.Println(c.Network, "error reading message", err.Error())
 			log.Println(c.Network, "closing Receiver")
@@ -67,7 +67,7 @@ func (c *Connection) Receiver() {
 		}
 		select {
 		case c.Output <- *msg:
-		case <-c.QuitRecv:
+		case <-c.quitrecv:
 			log.Println(c.Network, "closing Receiver")
 			return
 		}
@@ -79,36 +79,36 @@ func (c *Connection) Cleaner() {
 	for {
 		<-c.Quit
 		log.Println(c.Network, "ceceived quit message")
-		c.L.Lock()
+		c.l.Lock()
 		log.Println(c.Network, "cleaning up!")
-		c.QuitSend <- struct{}{}
-		c.QuitRecv <- struct{}{}
-		c.Reconnect <- struct{}{}
+		c.quitsend <- struct{}{}
+		c.quitrecv <- struct{}{}
+		c.reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.Network, "closing Cleaner")
-		c.L.Unlock()
+		c.l.Unlock()
 	}
 }
 
 func (c *Connection) Keeper(servers []string) {
 	log.Println(c.Network, "spawned Keeper")
 	for {
-		<-c.Reconnect
-		c.L.Lock()
+		<-c.reconnect
+		c.l.Lock()
 		if c.Input != nil {
 			close(c.Input)
 			close(c.Output)
-			close(c.QuitSend)
-			close(c.QuitRecv)
+			close(c.quitsend)
+			close(c.quitrecv)
 		}
 		c.Input = make(chan Message, 1)
 		c.Output = make(chan Message, 1)
-		c.QuitSend = make(chan struct{}, 1)
-		c.QuitRecv = make(chan struct{}, 1)
+		c.quitsend = make(chan struct{}, 1)
+		c.quitrecv = make(chan struct{}, 1)
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.Network, "connecting to", server)
 		c.Dial(server)
-		c.L.Unlock()
+		c.l.Unlock()
 
 		go c.Sender()
 		go c.Receiver()
@@ -130,14 +130,14 @@ func (c *Connection) Keeper(servers []string) {
 func (c *Connection) Setup(network string, servers []string, nick string, user string, realname string) {
 	rand.Seed(time.Now().UnixNano())
 
-	c.Reconnect = make(chan struct{}, 1)
+	c.reconnect = make(chan struct{}, 1)
 	c.Quit = make(chan struct{}, 1)
 	c.Nick = nick
 	c.User = user
 	c.RealName = realname
 	c.Network = network
 
-	c.Reconnect <- struct{}{}
+	c.reconnect <- struct{}{}
 	go c.Keeper(servers)
 	go c.Cleaner()
 	return
@@ -151,8 +151,8 @@ func (c *Connection) Dial(server string) error {
 		return err
 	}
 	log.Println(c.Network, "Connected to", server)
-	c.Writer = bufio.NewWriter(conn)
-	c.Reader = bufio.NewReader(conn)
+	c.writer = bufio.NewWriter(conn)
+	c.reader = bufio.NewReader(conn)
 	c.conn = conn
 
 	return nil
