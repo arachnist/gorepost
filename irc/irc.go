@@ -80,12 +80,12 @@ func (c *Connection) Cleaner() {
 	log.Println(c.Network, "spawned Cleaner")
 	for {
 		<-c.Quit
-		log.Println(c.Network, "ceceived quit message")
+		log.Println(c.Network, "received quit message")
 		c.l.Lock()
 		log.Println(c.Network, "cleaning up!")
 		c.quitsend <- struct{}{}
 		c.quitrecv <- struct{}{}
-        c.quitdispatcher <- struct{}{}
+		c.quitdispatcher <- struct{}{}
 		c.reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.Network, "closing Cleaner")
@@ -103,11 +103,13 @@ func (c *Connection) Keeper(servers []string) {
 			close(c.Output)
 			close(c.quitsend)
 			close(c.quitrecv)
+			close(c.quitdispatcher)
 		}
 		c.Input = make(chan Message, 1)
 		c.Output = make(chan Message, 1)
 		c.quitsend = make(chan struct{}, 1)
 		c.quitrecv = make(chan struct{}, 1)
+		c.quitdispatcher = make(chan struct{}, 1)
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.Network, "connecting to", server)
 		c.Dial(server)

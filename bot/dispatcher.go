@@ -26,6 +26,7 @@ func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Mess
 			}
 		case <-quit:
 			log.Println("closing Dispatcher")
+			return
 		}
 	}
 }
