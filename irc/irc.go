@@ -49,6 +49,7 @@ func (c *Connection) Sender() {
 func (c *Connection) Receiver() {
 	log.Println(c.Network, "spawned Receiver")
 	for {
+		c.conn.SetReadDeadline(time.Now().Add(time.Second * 600))
 		raw, err := c.reader.ReadString(delim)
 		if err != nil {
 			log.Println(c.Network, "error reading message", err.Error())
@@ -154,7 +155,7 @@ func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Mes
 }
 
 func (c *Connection) Dial(server string) error {
-	conn, err := net.Dial("tcp", server)
+	conn, err := net.DialTimeout("tcp", server, time.Second*30)
 	if err != nil {
 		log.Println(c.Network, "Cannot connect to", server, "error:", err.Error())
 		return err
