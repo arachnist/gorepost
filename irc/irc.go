@@ -112,24 +112,27 @@ func (c *Connection) Keeper(servers []string) {
 		c.quitdispatcher = make(chan struct{}, 1)
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.Network, "connecting to", server)
-		c.Dial(server)
+		err := c.Dial(server)
 		c.l.Unlock()
+		if err == nil {
+			go c.Sender()
+			go c.Receiver()
+			go c.dispatcher(c.quitdispatcher, c.Input, c.Output)
 
-		go c.Sender()
-		go c.Receiver()
-		go c.dispatcher(c.quitdispatcher, c.Input, c.Output)
-
-		log.Println(c.Network, "Initializing IRC connection")
-		c.Input <- Message{
-			Command:  "NICK",
-			Trailing: c.Nick,
+			log.Println(c.Network, "Initializing IRC connection")
+			c.Input <- Message{
+				Command:  "NICK",
+				Trailing: c.Nick,
+			}
+			c.Input <- Message{
+				Command:  "USER",
+				Params:   []string{c.User, "0", "*"},
+				Trailing: c.RealName,
+			}
+		} else {
+			log.Println(c.Network, "connection error", err.Error())
+			c.reconnect <- struct{}{}
 		}
-		c.Input <- Message{
-			Command:  "USER",
-			Params:   []string{c.User, "0", "*"},
-			Trailing: c.RealName,
-		}
-
 	}
 }
 
@@ -151,7 +154,6 @@ func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Mes
 }
 
 func (c *Connection) Dial(server string) error {
-
 	conn, err := net.Dial("tcp", server)
 	if err != nil {
 		log.Println(c.Network, "Cannot connect to", server, "error:", err.Error())
