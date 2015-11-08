@@ -11,8 +11,9 @@ import (
 )
 
 func main() {
-	config, err := config.ReadConfig(os.Args[1])
 	var exit chan struct{}
+
+	config, err := config.ReadConfig(os.Args[1])
 	if err != nil {
 		fmt.Println("Error reading configuration from", os.Args[1], "error:", err.Error())
 		os.Exit(1)
@@ -28,10 +29,7 @@ func main() {
 	connections := make([]irc.Connection, len(config.Networks))
 	for i, _ := range connections {
 		network := config.Networks[i]
-		connections[i].L.Lock()
-		connections[i].Setup(network, config.Servers[network], config.Nick, config.User, config.RealName)
-		connections[i].L.Unlock()
-		go bot.Dispatcher(&connections[i].Input, &connections[i].Output)
+		connections[i].Setup(bot.Dispatcher, network, config.Servers[network], config.Nick, config.User, config.RealName)
 	}
 	<-exit
 }

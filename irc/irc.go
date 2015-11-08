@@ -13,20 +13,22 @@ const delim byte = '\n'
 const endline string = "\r\n"
 
 type Connection struct {
-	Network   string
-	Nick      string
-	User      string
-	RealName  string
-	Input     chan Message
-	Output    chan Message
-	reader    *bufio.Reader
-	writer    *bufio.Writer
-	conn      net.Conn
-	reconnect chan struct{}
-	Quit      chan struct{}
-	quitsend  chan struct{}
-	quitrecv  chan struct{}
-	l         sync.Mutex
+	Network        string
+	Nick           string
+	User           string
+	RealName       string
+	Input          chan Message
+	Output         chan Message
+	reader         *bufio.Reader
+	writer         *bufio.Writer
+	dispatcher     func(chan struct{}, chan Message, chan Message)
+	conn           net.Conn
+	reconnect      chan struct{}
+	Quit           chan struct{}
+	quitsend       chan struct{}
+	quitrecv       chan struct{}
+	quitdispatcher chan struct{}
+	l              sync.Mutex
 }
 
 func (c *Connection) Sender() {
@@ -112,6 +114,7 @@ func (c *Connection) Keeper(servers []string) {
 
 		go c.Sender()
 		go c.Receiver()
+		go c.dispatcher(c.quitdispatcher, c.Input, c.Output)
 
 		log.Println(c.Network, "Initializing IRC connection")
 		c.Input <- Message{
@@ -127,7 +130,7 @@ func (c *Connection) Keeper(servers []string) {
 	}
 }
 
-func (c *Connection) Setup(network string, servers []string, nick string, user string, realname string) {
+func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string, servers []string, nick string, user string, realname string) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)
@@ -136,6 +139,7 @@ func (c *Connection) Setup(network string, servers []string, nick string, user s
 	c.User = user
 	c.RealName = realname
 	c.Network = network
+	c.dispatcher = dispatcher
 
 	c.reconnect <- struct{}{}
 	go c.Keeper(servers)

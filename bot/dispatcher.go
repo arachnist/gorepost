@@ -2,7 +2,6 @@ package bot
 
 import (
 	"log"
-	"time"
 
 	"github.com/arachnist/gorepost/irc"
 )
@@ -17,14 +16,16 @@ func RemoveCallback(command string) {
 	delete(Callbacks, command)
 }
 
-func Dispatcher(output *chan irc.Message, input *chan irc.Message) {
-	// FIXME
-	time.Sleep(time.Second * 2)
+func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Message) {
 	log.Println("spawned Dispatcher")
 	for {
-		msg := <-*input
-		if Callbacks[msg.Command] != nil {
-			go Callbacks[msg.Command](*output, msg)
+		select {
+		case msg := <-input:
+			if Callbacks[msg.Command] != nil {
+				go Callbacks[msg.Command](output, msg)
+			}
+		case <-quit:
+			log.Println("closing Dispatcher")
 		}
 	}
 }
