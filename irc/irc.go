@@ -13,21 +13,21 @@ const delim byte = '\n'
 const endline string = "\r\n"
 
 type Connection struct {
-	Network        string
-	Nick           string
-	User           string
-	RealName       string
-	Input          chan Message
-	Output         chan Message
-	Reader         *bufio.Reader
-	Writer         *bufio.Writer
-	conn           net.Conn
-	Reconnect      chan struct{}
-	Quit           chan struct{}
-	QuitSend       chan struct{}
-	QuitRecv       chan struct{}
-	QuitDispatcher chan struct{}
-	m              sync.Mutex
+	Network   string
+	Nick      string
+	User      string
+	RealName  string
+	Input     chan Message
+	Output    chan Message
+	Reader    *bufio.Reader
+	Writer    *bufio.Writer
+	conn      net.Conn
+	Reconnect chan struct{}
+	Quit      chan struct{}
+	QuitSend  chan struct{}
+	QuitRecv  chan struct{}
+	// QuitDispatcher chan struct{}
+	L sync.Mutex
 }
 
 func (c *Connection) Sender() {
@@ -75,6 +75,7 @@ func (c *Connection) Receiver() {
 	}
 }
 
+/*
 func (c *Connection) Dispatcher() {
 	log.Println(c.Network, "spawned Dispatcher")
 	for {
@@ -87,21 +88,22 @@ func (c *Connection) Dispatcher() {
 		}
 	}
 }
+*/
 
 func (c *Connection) Cleaner() {
 	log.Println(c.Network, "spawned Cleaner")
 	for {
 		<-c.Quit
 		log.Println(c.Network, "ceceived quit message")
-		c.m.Lock()
+		c.L.Lock()
 		log.Println(c.Network, "cleaning up!")
 		c.QuitSend <- struct{}{}
 		c.QuitRecv <- struct{}{}
-		c.QuitDispatcher <- struct{}{}
+		// c.QuitDispatcher <- struct{}{}
 		c.Reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.Network, "closing Cleaner")
-		c.m.Unlock()
+		c.L.Unlock()
 	}
 }
 
@@ -109,27 +111,27 @@ func (c *Connection) Keeper(servers []string) {
 	log.Println(c.Network, "spawned Keeper")
 	for {
 		<-c.Reconnect
-		c.m.Lock()
+		c.L.Lock()
 		if c.Input != nil {
 			close(c.Input)
 			close(c.Output)
 			close(c.QuitSend)
 			close(c.QuitRecv)
-			close(c.QuitDispatcher)
+			// close(c.QuitDispatcher)
 		}
 		c.Input = make(chan Message, 1)
 		c.Output = make(chan Message, 1)
 		c.QuitSend = make(chan struct{}, 1)
 		c.QuitRecv = make(chan struct{}, 1)
-		c.QuitDispatcher = make(chan struct{}, 1)
+		// c.QuitDispatcher = make(chan struct{}, 1)
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.Network, "connecting to", server)
 		c.Dial(server)
-		c.m.Unlock()
+		c.L.Unlock()
 
 		go c.Sender()
 		go c.Receiver()
-		go c.Dispatcher()
+		// go c.Dispatcher()
 
 		log.Println(c.Network, "Initializing IRC connection")
 		c.Input <- Message{

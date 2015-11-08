@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/arachnist/gorepost/bot"
 	"github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
@@ -27,7 +28,10 @@ func main() {
 	connections := make([]irc.Connection, len(config.Networks))
 	for i, _ := range connections {
 		network := config.Networks[i]
+		connections[i].L.Lock()
 		connections[i].Setup(network, config.Servers[network], config.Nick, config.User, config.RealName)
+		connections[i].L.Unlock()
+		go bot.Dispatcher(&connections[i].Input, &connections[i].Output)
 	}
 	<-exit
 }
