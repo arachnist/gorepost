@@ -26,7 +26,6 @@ type Connection struct {
 	Quit      chan struct{}
 	QuitSend  chan struct{}
 	QuitRecv  chan struct{}
-	// QuitDispatcher chan struct{}
 	L sync.Mutex
 }
 
@@ -75,21 +74,6 @@ func (c *Connection) Receiver() {
 	}
 }
 
-/*
-func (c *Connection) Dispatcher() {
-	log.Println(c.Network, "spawned Dispatcher")
-	for {
-		// just sink everything for now
-		select {
-		case <-c.Output:
-		case <-c.QuitDispatcher:
-			log.Println(c.Network, "closing Dispatcher")
-			return
-		}
-	}
-}
-*/
-
 func (c *Connection) Cleaner() {
 	log.Println(c.Network, "spawned Cleaner")
 	for {
@@ -99,7 +83,6 @@ func (c *Connection) Cleaner() {
 		log.Println(c.Network, "cleaning up!")
 		c.QuitSend <- struct{}{}
 		c.QuitRecv <- struct{}{}
-		// c.QuitDispatcher <- struct{}{}
 		c.Reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.Network, "closing Cleaner")
@@ -117,13 +100,11 @@ func (c *Connection) Keeper(servers []string) {
 			close(c.Output)
 			close(c.QuitSend)
 			close(c.QuitRecv)
-			// close(c.QuitDispatcher)
 		}
 		c.Input = make(chan Message, 1)
 		c.Output = make(chan Message, 1)
 		c.QuitSend = make(chan struct{}, 1)
 		c.QuitRecv = make(chan struct{}, 1)
-		// c.QuitDispatcher = make(chan struct{}, 1)
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.Network, "connecting to", server)
 		c.Dial(server)
@@ -131,7 +112,6 @@ func (c *Connection) Keeper(servers []string) {
 
 		go c.Sender()
 		go c.Receiver()
-		// go c.Dispatcher()
 
 		log.Println(c.Network, "Initializing IRC connection")
 		c.Input <- Message{
