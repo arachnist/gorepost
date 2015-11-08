@@ -85,6 +85,7 @@ func (c *Connection) Cleaner() {
 		log.Println(c.Network, "cleaning up!")
 		c.quitsend <- struct{}{}
 		c.quitrecv <- struct{}{}
+        c.quitdispatcher <- struct{}{}
 		c.reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.Network, "closing Cleaner")
