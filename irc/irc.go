@@ -110,6 +110,13 @@ func (c *Connection) Keeper(servers []string) {
 	for {
 		<-c.Reconnect
 		c.m.Lock()
+		if c.Input != nil {
+			close(c.Input)
+			close(c.Output)
+			close(c.QuitSend)
+			close(c.QuitRecv)
+			close(c.QuitDispatcher)
+		}
 		c.Input = make(chan Message, 1)
 		c.Output = make(chan Message, 1)
 		c.QuitSend = make(chan struct{}, 1)
