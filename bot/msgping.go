@@ -4,7 +4,7 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-func papiez(output chan irc.Message, msg irc.Message) {
+func ping(output chan irc.Message, msg irc.Message) {
 	output <- irc.Message{
 		Command:  "PRIVMSG",
 		Params:   []string{msg.Prefix.Name},
@@ -13,5 +13,5 @@ func papiez(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddMSGCallback(":ping", papiez)
+	AddMSGCallback(":ping", ping)
 }
