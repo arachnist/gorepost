@@ -1,10 +1,16 @@
 package bot
 
 import (
+	"strings"
+
 	"github.com/arachnist/gorepost/irc"
 )
 
 func ping(output chan irc.Message, msg irc.Message) {
+	if strings.Split(msg.Trailing, " ")[0] != ":ping" {
+		return
+	}
+
 	output <- irc.Message{
 		Command:  "PRIVMSG",
 		Params:   []string{msg.Prefix.Name},
@@ -13,5 +19,5 @@ func ping(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddMSGCallback(":ping", ping)
+	AddCallback("PRIVMSG", "ping", ping)
 }

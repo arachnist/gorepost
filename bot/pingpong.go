@@ -12,5 +12,5 @@ func pingpong(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddCallback("PING", pingpong)
+	AddCallback("PING", "ping", pingpong)
 }

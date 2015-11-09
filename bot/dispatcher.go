@@ -7,24 +7,18 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-var Callbacks = make(map[string]func(chan irc.Message, irc.Message))
+var Callbacks = make(map[string]map[string]func(chan irc.Message, irc.Message))
 
-func AddCallback(command string, callback func(chan irc.Message, irc.Message)) {
-	Callbacks[command] = callback
+func AddCallback(command, name string, callback func(chan irc.Message, irc.Message)) {
+	log.Println("adding callback", command, name)
+	if _, ok := Callbacks[command]; !ok {
+		Callbacks[command] = make(map[string]func(chan irc.Message, irc.Message))
+	}
+	Callbacks[strings.ToUpper(command)][strings.ToUpper(name)] = callback
 }
 
-func RemoveCallback(command string) {
-	delete(Callbacks, command)
-}
-
-var MSGCallbacks = make(map[string]func(chan irc.Message, irc.Message))
-
-func AddMSGCallback(command string, callback func(chan irc.Message, irc.Message)) {
-	MSGCallbacks[command] = callback
-}
-
-func RemoveMSGCallback(command string) {
-	delete(MSGCallbacks, command)
+func RemoveCallback(command, name string) {
+	delete(Callbacks[command], name)
 }
 
 func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Message) {
@@ -32,14 +26,10 @@ func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Mess
 	for {
 		select {
 		case msg := <-input:
-			if msg.Command == "PRIVMSG" {
-				cmd := strings.Split(msg.Trailing, " ")[0]
-				if MSGCallbacks[cmd] != nil {
-					go MSGCallbacks[cmd](output, msg)
-				}
-			}
 			if Callbacks[msg.Command] != nil {
-				go Callbacks[msg.Command](output, msg)
+				for _, f := range Callbacks[msg.Command] {
+					go f(output, msg)
+				}
 			}
 		case <-quit:
 			log.Println("closing Dispatcher")
