@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -13,16 +12,17 @@ import (
 func main() {
 	var exit chan struct{}
 
+	if len(os.Args) < 2 {
+		log.Fatalln("Usage:", os.Args[0], "<config-file.json>")
+	}
 	config, err := config.ReadConfig(os.Args[1])
 	if err != nil {
-		fmt.Println("Error reading configuration from", os.Args[1], "error:", err.Error())
-		os.Exit(1)
+		log.Fatalln("Error reading configuration from", os.Args[1], "error:", err.Error())
 	}
 
 	logfile, err := os.OpenFile(config.Logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("Error opening", config.Logpath, "for writing, error:", err.Error())
-		os.Exit(1)
+		log.Fatalln("Error opening", config.Logpath, "for writing, error:", err.Error())
 	}
 	log.SetOutput(logfile)
 
