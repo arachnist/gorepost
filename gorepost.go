@@ -5,41 +5,44 @@ import (
 	"os"
 
 	"github.com/arachnist/gorepost/bot"
-	"github.com/arachnist/gorepost/config"
+	. "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
 func main() {
 	var exit chan struct{}
+	var context Context
 
 	if len(os.Args) < 2 {
-		log.Fatalln("Usage:", os.Args[0], "<config-file.json>")
+		log.Fatalln("Usage:", os.Args[0], "<configuration directory>")
 	}
-	config, err := config.ReadConfig(os.Args[1])
+
+	d, err := os.Stat(os.Args[1])
 	if err != nil {
 		log.Fatalln("Error reading configuration from", os.Args[1], "error:", err.Error())
 	}
+	if !d.IsDir() {
+		log.Fatalln("Not a directory:", os.Args[1])
+	}
 
-	logfile, err := os.OpenFile(config.Logpath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	C.ConfigDir = os.Args[1]
+
+	logfile, err := os.OpenFile(C.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalln("Error opening", config.Logpath, "for writing, error:", err.Error())
+		log.Fatalln("Error opening", C.Lookup(context, "Logpath").(string), "for writing, error:", err.Error())
 	}
 	log.SetOutput(logfile)
 
-	connections := make([]irc.Connection, len(config.Networks))
-	for i, _ := range connections {
-		network := config.Networks[i]
-		connections[i].Setup(bot.Dispatcher, network, config.Servers[network], config.Nick, config.User, config.RealName)
+	networks := C.Lookup(context, "Networks").([]string)
+	connections := make([]irc.Connection, len(networks))
+	for i, conn := range connections {
+		context.Network = networks[i]
 
-		bot.AddCallback("001", "channel join", func(output chan irc.Message, msg irc.Message) {
-			for _, channel := range config.Channels[network] {
-				log.Println(network, "joining channel", channel)
-				output <- irc.Message{
-					Command: "JOIN",
-					Params:  []string{channel},
-				}
-			}
-		})
+		connections[i].Setup(bot.Dispatcher, networks[i],
+			C.Lookup(context, "Servers").([]string),
+			C.Lookup(context, "Nick").(string),
+			C.Lookup(context, "User").(string),
+			C.Lookup(context, "RealName").(string))
 	}
 	<-exit
 }

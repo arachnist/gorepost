@@ -7,6 +7,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	. "github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
@@ -21,7 +23,7 @@ type Connection struct {
 	Output         chan Message
 	reader         *bufio.Reader
 	writer         *bufio.Writer
-	dispatcher     func(chan struct{}, chan Message, chan Message)
+	dispatcher     func(chan struct{}, Context, chan Message, chan Message)
 	conn           net.Conn
 	reconnect      chan struct{}
 	Quit           chan struct{}
@@ -137,7 +139,7 @@ func (c *Connection) Keeper(servers []string) {
 	}
 }
 
-func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string, servers []string, nick string, user string, realname string) {
+func (c *Connection) Setup(dispatcher func(chan struct{}, Context, chan Message, chan Message), network string, servers []string, nick string, user string, realname string) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)
