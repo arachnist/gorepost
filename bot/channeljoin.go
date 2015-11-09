@@ -7,9 +7,9 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-func channeljoin(c Context, output chan irc.Message, msg irc.Message) {
-	for _, channel := range C.Lookup(c, "Channels").([]string) {
-		log.Println(c.Network, "joining channel", channel)
+func channeljoin(output chan irc.Message, msg irc.Message) {
+	for _, channel := range C.Lookup(msg.Context, "Channels").([]string) {
+		log.Println(msg.Context.Network, "joining channel", channel)
 		output <- irc.Message{
 			Command: "JOIN",
 			Params:  []string{channel},
@@ -18,5 +18,5 @@ func channeljoin(c Context, output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddCallback("001", "channel join", channeljoin)
+	// AddCallback("001", "channel join", channeljoin)
 }

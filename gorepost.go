@@ -12,6 +12,7 @@ import (
 func main() {
 	var exit chan struct{}
 	var context Context
+	var networks []string
 
 	if len(os.Args) < 2 {
 		log.Fatalln("Usage:", os.Args[0], "<configuration directory>")
@@ -33,13 +34,26 @@ func main() {
 	}
 	log.SetOutput(logfile)
 
-	networks := C.Lookup(context, "Networks").([]string)
+	rawNetworks := C.Lookup(context, "Networks").([]interface{})
+	for _, n := range rawNetworks {
+		networks = append(networks, n.(string))
+	}
+
+	log.Println("Configured networks:", len(networks), networks)
+
 	connections := make([]irc.Connection, len(networks))
-	for i, conn := range connections {
+	for i, _ := range connections {
+		var servers []string
 		context.Network = networks[i]
 
+		rawServers := C.Lookup(context, "Servers").([]interface{})
+		log.Println("Rawservers:", rawServers)
+		for _, n := range rawServers {
+			servers = append(servers, n.(string))
+		}
+		log.Println(context.Network, "Configured servers", len(servers), servers)
 		connections[i].Setup(bot.Dispatcher, networks[i],
-			C.Lookup(context, "Servers").([]string),
+			servers,
 			C.Lookup(context, "Nick").(string),
 			C.Lookup(context, "User").(string),
 			C.Lookup(context, "RealName").(string))
