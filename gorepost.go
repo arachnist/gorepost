@@ -30,6 +30,16 @@ func main() {
 	for i, _ := range connections {
 		network := config.Networks[i]
 		connections[i].Setup(bot.Dispatcher, network, config.Servers[network], config.Nick, config.User, config.RealName)
+
+		bot.AddCallback("001", func(output chan irc.Message, msg irc.Message) {
+			for _, channel := range config.Channels[network] {
+				log.Println(network, "joining channel", channel)
+				output <- irc.Message{
+					Command: "JOIN",
+					Params:  []string{channel},
+				}
+			}
+		})
 	}
 	<-exit
 }
