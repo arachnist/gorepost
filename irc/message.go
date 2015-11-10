@@ -154,7 +154,7 @@ func (p *Prefix) writeTo(buffer *bytes.Buffer) {
 //
 //    <crlf>     ::= CR LF
 type Message struct {
-	Context
+	*Context
 	*Prefix
 	Command  string
 	Params   []string

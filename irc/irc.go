@@ -7,6 +7,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	. "github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
@@ -51,6 +53,7 @@ func (c *Connection) Receiver() {
 	for {
 		c.conn.SetReadDeadline(time.Now().Add(time.Second * 600))
 		raw, err := c.reader.ReadString(delim)
+		var src, tgt string
 		if err != nil {
 			log.Println(c.Network, "error reading message", err.Error())
 			log.Println(c.Network, "closing Receiver")
@@ -67,6 +70,21 @@ func (c *Connection) Receiver() {
 			return
 		} else {
 			log.Println(c.Network, "<--", msg.String())
+		}
+		if msg.Params == nil {
+			tgt = ""
+		} else {
+			tgt = msg.Params[0]
+		}
+		if msg.Prefix == nil {
+			src = ""
+		} else {
+			src = msg.Prefix.Name
+		}
+		msg.Context = &Context{
+			Network: c.Network,
+			Source:  src,
+			Target:  tgt,
 		}
 		select {
 		case c.Output <- *msg:
