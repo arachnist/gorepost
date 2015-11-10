@@ -8,8 +8,6 @@ import (
 	"bytes"
 	"errors"
 	"strings"
-
-	. "github.com/arachnist/gorepost/config"
 )
 
 // Various constants used for formatting IRC messages.
@@ -154,7 +152,7 @@ func (p *Prefix) writeTo(buffer *bytes.Buffer) {
 //
 //    <crlf>     ::= CR LF
 type Message struct {
-	*Context
+	Context map[string]string
 	*Prefix
 	Command  string
 	Params   []string

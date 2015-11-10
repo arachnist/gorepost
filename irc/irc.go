@@ -7,8 +7,6 @@ import (
 	"net"
 	"sync"
 	"time"
-
-	. "github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
@@ -81,10 +79,10 @@ func (c *Connection) Receiver() {
 		} else {
 			src = msg.Prefix.Name
 		}
-		msg.Context = &Context{
-			Network: c.Network,
-			Source:  src,
-			Target:  tgt,
+		msg.Context = map[string]string{
+			"Network": c.Network,
+			"Source":  src,
+			"Target":  tgt,
 		}
 		select {
 		case c.Output <- *msg:

@@ -8,8 +8,8 @@ import (
 )
 
 func channeljoin(output chan irc.Message, msg irc.Message) {
-	for _, channel := range C.Lookup(*msg.Context, "Channels").([]interface{}) {
-		log.Println(msg.Context.Network, "joining channel", channel)
+	for _, channel := range C.Lookup(msg.Context, "Channels").([]interface{}) {
+		log.Println(msg.Context["Network"], "joining channel", channel)
 		output <- irc.Message{
 			Command: "JOIN",
 			Params:  []string{channel.(string)},

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 
 	"github.com/arachnist/gorepost/bot"
 	. "github.com/arachnist/gorepost/config"
@@ -11,7 +12,7 @@ import (
 
 func main() {
 	var exit chan struct{}
-	var context Context
+	context := make(map[string]string)
 	var networks []string
 
 	if len(os.Args) < 2 {
@@ -26,7 +27,21 @@ func main() {
 		log.Fatalln("Not a directory:", os.Args[1])
 	}
 
-	C.ConfigDir = os.Args[1]
+	C.BuildFileList = func(c map[string]string) []string {
+		var r []string
+
+		if c["Network"] != "" {
+			if c["Source"] != "" {
+				if c["Target"] != "" {
+					r = append(r, path.Join(os.Args[1], c["Network"], c["Source"], c["Target"]+".json"))
+				}
+				r = append(r, path.Join(os.Args[1], c["Network"], c["Source"]+".json"))
+			}
+			r = append(r, path.Join(os.Args[1], c["Network"]+".json"))
+		}
+
+		return append(r, path.Join(os.Args[1], "common.json"))
+	}
 
 	logfile, err := os.OpenFile(C.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -44,14 +59,14 @@ func main() {
 	connections := make([]irc.Connection, len(networks))
 	for i, _ := range connections {
 		var servers []string
-		context.Network = networks[i]
+		context["Network"] = networks[i]
 
 		rawServers := C.Lookup(context, "Servers").([]interface{})
 		log.Println("Rawservers:", rawServers)
 		for _, n := range rawServers {
 			servers = append(servers, n.(string))
 		}
-		log.Println(context.Network, "Configured servers", len(servers), servers)
+		log.Println(context["Network"], "Configured servers", len(servers), servers)
 		connections[i].Setup(bot.Dispatcher, networks[i],
 			servers,
 			C.Lookup(context, "Nick").(string),
