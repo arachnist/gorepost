@@ -4,6 +4,7 @@ import (
 	"log"
 	"strings"
 
+	. "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -21,13 +22,33 @@ func RemoveCallback(command, name string) {
 	delete(Callbacks[command], name)
 }
 
+func elementInSlice(s []interface{}, e interface{}) bool {
+	for _, se := range s {
+		if se == e {
+			return true
+		}
+	}
+
+	return false
+}
+
 func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Message) {
 	log.Println("spawned Dispatcher")
 	for {
 		select {
 		case msg := <-input:
+			if msg.Context["Source"] != "" {
+				if elementInSlice(C.Lookup(msg.Context, "Ignore").([]interface{}), msg.Context["Source"]) {
+					log.Println("Context:", msg.Context, "Ignoring", msg.Context["Source"])
+					continue
+				}
+			}
 			if Callbacks[msg.Command] != nil {
-				for _, f := range Callbacks[msg.Command] {
+				for i, f := range Callbacks[msg.Command] {
+					if elementInSlice(C.Lookup(msg.Context, "DisabledPlugins").([]interface{}), i) {
+						log.Println("Context:", msg.Context, "Plugin disabled", i)
+						continue
+					}
 					go f(output, msg)
 				}
 			}
