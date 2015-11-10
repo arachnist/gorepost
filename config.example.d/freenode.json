@@ -1,0 +1,4 @@
+{
+    "Servers":["chat.freenode.net:6667", "kornbluth.freenode.net:6667"],
+    "Channels":["#gorepost-test"]
+}
