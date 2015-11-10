@@ -7,18 +7,17 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	. "github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
 const endline string = "\r\n"
 
 type Connection struct {
-	Network        string
-	Nick           string
-	User           string
-	RealName       string
-	Input          chan Message
-	Output         chan Message
+	network        string
+	input          chan Message
+	output         chan Message
 	reader         *bufio.Reader
 	writer         *bufio.Writer
 	dispatcher     func(chan struct{}, chan Message, chan Message)
@@ -32,42 +31,42 @@ type Connection struct {
 }
 
 func (c *Connection) Sender() {
-	log.Println(c.Network, "spawned Sender")
+	log.Println(c.network, "spawned Sender")
 	for {
 		select {
-		case msg := <-c.Input:
+		case msg := <-c.input:
 			c.writer.WriteString(msg.String() + endline)
-			log.Println(c.Network, "-->", msg.String())
+			log.Println(c.network, "-->", msg.String())
 			c.writer.Flush()
 		case <-c.quitsend:
-			log.Println(c.Network, "closing Sender")
+			log.Println(c.network, "closing Sender")
 			return
 		}
 	}
 }
 
 func (c *Connection) Receiver() {
-	log.Println(c.Network, "spawned Receiver")
+	log.Println(c.network, "spawned Receiver")
 	for {
 		c.conn.SetReadDeadline(time.Now().Add(time.Second * 600))
 		raw, err := c.reader.ReadString(delim)
 		var src, tgt string
 		if err != nil {
-			log.Println(c.Network, "error reading message", err.Error())
-			log.Println(c.Network, "closing Receiver")
+			log.Println(c.network, "error reading message", err.Error())
+			log.Println(c.network, "closing Receiver")
 			c.Quit <- struct{}{}
-			log.Println(c.Network, "sent quit message from Receiver")
+			log.Println(c.network, "sent quit message from Receiver")
 			return
 		}
 		msg, err := ParseMessage(raw)
 		if err != nil {
-			log.Println(c.Network, "error decoding message", err.Error())
-			log.Println(c.Network, "closing Receiver")
+			log.Println(c.network, "error decoding message", err.Error())
+			log.Println(c.network, "closing Receiver")
 			c.Quit <- struct{}{}
-			log.Println(c.Network, "sent quit message from Receiver")
+			log.Println(c.network, "sent quit message from Receiver")
 			return
 		} else {
-			log.Println(c.Network, "<--", msg.String())
+			log.Println(c.network, "<--", msg.String())
 		}
 		if msg.Params == nil {
 			tgt = ""
@@ -80,92 +79,93 @@ func (c *Connection) Receiver() {
 			src = msg.Prefix.Name
 		}
 		msg.Context = map[string]string{
-			"Network": c.Network,
+			"Network": c.network,
 			"Source":  src,
 			"Target":  tgt,
 		}
 		select {
-		case c.Output <- *msg:
+		case c.output <- *msg:
 		case <-c.quitrecv:
-			log.Println(c.Network, "closing Receiver")
+			log.Println(c.network, "closing Receiver")
 			return
 		}
 	}
 }
 
 func (c *Connection) Cleaner() {
-	log.Println(c.Network, "spawned Cleaner")
+	log.Println(c.network, "spawned Cleaner")
 	for {
 		<-c.Quit
-		log.Println(c.Network, "received quit message")
+		log.Println(c.network, "received quit message")
 		c.l.Lock()
-		log.Println(c.Network, "cleaning up!")
+		log.Println(c.network, "cleaning up!")
 		c.quitsend <- struct{}{}
 		c.quitrecv <- struct{}{}
 		c.quitdispatcher <- struct{}{}
 		c.reconnect <- struct{}{}
 		c.conn.Close()
-		log.Println(c.Network, "closing Cleaner")
+		log.Println(c.network, "closing Cleaner")
 		c.l.Unlock()
 	}
 }
 
-func (c *Connection) Keeper(servers []string) {
-	log.Println(c.Network, "spawned Keeper")
+func (c *Connection) Keeper() {
+	log.Println(c.network, "spawned Keeper")
+	context := make(map[string]string)
+	context["Network"] = c.network
 	for {
 		<-c.reconnect
 		c.l.Lock()
-		if c.Input != nil {
-			close(c.Input)
-			close(c.Output)
+		if c.input != nil {
+			close(c.input)
+			close(c.output)
 			close(c.quitsend)
 			close(c.quitrecv)
 			close(c.quitdispatcher)
 		}
-		c.Input = make(chan Message, 1)
-		c.Output = make(chan Message, 1)
+		c.input = make(chan Message, 1)
+		c.output = make(chan Message, 1)
 		c.quitsend = make(chan struct{}, 1)
 		c.quitrecv = make(chan struct{}, 1)
 		c.quitdispatcher = make(chan struct{}, 1)
-		server := servers[rand.Intn(len(servers))]
-		log.Println(c.Network, "connecting to", server)
+		servers := C.Lookup(context, "Servers").([]interface{})
+
+		server := servers[rand.Intn(len(servers))].(string)
+		log.Println(c.network, "connecting to", server)
 		err := c.Dial(server)
 		c.l.Unlock()
 		if err == nil {
 			go c.Sender()
 			go c.Receiver()
-			go c.dispatcher(c.quitdispatcher, c.Input, c.Output)
+			go c.dispatcher(c.quitdispatcher, c.input, c.output)
 
-			log.Println(c.Network, "Initializing IRC connection")
-			c.Input <- Message{
+			log.Println(c.network, "Initializing IRC connection")
+			c.input <- Message{
 				Command:  "NICK",
-				Trailing: c.Nick,
+				Trailing: C.Lookup(context, "Nick").(string),
 			}
-			c.Input <- Message{
+			c.input <- Message{
 				Command:  "USER",
-				Params:   []string{c.User, "0", "*"},
-				Trailing: c.RealName,
+				Params:   []string{C.Lookup(context, "User").(string), "0", "*"},
+				Trailing: C.Lookup(context, "RealName").(string),
 			}
 		} else {
-			log.Println(c.Network, "connection error", err.Error())
+			log.Println(c.network, "connection error", err.Error())
 			c.reconnect <- struct{}{}
 		}
 	}
 }
 
-func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string, servers []string, nick string, user string, realname string) {
+func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)
 	c.Quit = make(chan struct{}, 1)
-	c.Nick = nick
-	c.User = user
-	c.RealName = realname
-	c.Network = network
+	c.network = network
 	c.dispatcher = dispatcher
 
 	c.reconnect <- struct{}{}
-	go c.Keeper(servers)
+	go c.Keeper()
 	go c.Cleaner()
 	return
 }
@@ -173,10 +173,10 @@ func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Mes
 func (c *Connection) Dial(server string) error {
 	conn, err := net.DialTimeout("tcp", server, time.Second*30)
 	if err != nil {
-		log.Println(c.Network, "Cannot connect to", server, "error:", err.Error())
+		log.Println(c.network, "Cannot connect to", server, "error:", err.Error())
 		return err
 	}
-	log.Println(c.Network, "Connected to", server)
+	log.Println(c.network, "Connected to", server)
 	c.writer = bufio.NewWriter(conn)
 	c.reader = bufio.NewReader(conn)
 	c.conn = conn

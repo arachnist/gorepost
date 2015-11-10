@@ -13,7 +13,6 @@ import (
 func main() {
 	var exit chan struct{}
 	context := make(map[string]string)
-	var networks []string
 
 	if len(os.Args) < 2 {
 		log.Fatalln("Usage:", os.Args[0], "<configuration directory>")
@@ -43,35 +42,20 @@ func main() {
 		return append(r, path.Join(os.Args[1], "common.json"))
 	}
 
-	logfile, err := os.OpenFile(C.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	logfile, err := os.OpenFile(C.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatalln("Error opening", C.Lookup(context, "Logpath").(string), "for writing, error:", err.Error())
 	}
 	log.SetOutput(logfile)
 
-	rawNetworks := C.Lookup(context, "Networks").([]interface{})
-	for _, n := range rawNetworks {
-		networks = append(networks, n.(string))
-	}
+	networks := C.Lookup(context, "Networks").([]interface{})
 
 	log.Println("Configured networks:", len(networks), networks)
 
 	connections := make([]irc.Connection, len(networks))
-	for i, _ := range connections {
-		var servers []string
-		context["Network"] = networks[i]
-
-		rawServers := C.Lookup(context, "Servers").([]interface{})
-		log.Println("Rawservers:", rawServers)
-		for _, n := range rawServers {
-			servers = append(servers, n.(string))
-		}
-		log.Println(context["Network"], "Configured servers", len(servers), servers)
-		connections[i].Setup(bot.Dispatcher, networks[i],
-			servers,
-			C.Lookup(context, "Nick").(string),
-			C.Lookup(context, "User").(string),
-			C.Lookup(context, "RealName").(string))
+	for i := range connections {
+		log.Println("Setting up", networks[i].(string), "connection")
+		connections[i].Setup(bot.Dispatcher, networks[i].(string))
 	}
 	<-exit
 }
