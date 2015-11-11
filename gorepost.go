@@ -15,11 +15,12 @@ func FileListFuncBuilder(basedir, common string) func(map[string]string) []strin
 		var r []string
 
 		if c["Network"] != "" {
-			if c["Source"] != "" {
-				if c["Target"] != "" {
-					r = append(r, path.Join(basedir, c["Network"], c["Source"], c["Target"]+".json"))
+			if c["Target"] != "" {
+				if c["Source"] != "" {
+					r = append(r, path.Join(basedir, c["Network"], c["Target"], c["Source"]+".json"))
+					r = append(r, path.Join(basedir, c["Network"], c["Source"]+".json"))
 				}
-				r = append(r, path.Join(basedir, c["Network"], c["Source"]+".json"))
+				r = append(r, path.Join(basedir, c["Network"], c["Target"]+".json"))
 			}
 			r = append(r, path.Join(basedir, c["Network"]+".json"))
 		}
