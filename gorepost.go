@@ -57,10 +57,10 @@ func main() {
 
 	log.Println("Configured networks:", len(networks), networks)
 
-	connections := make([]irc.Connection, len(networks))
-	for i := range connections {
+	for i, conn := range make([]irc.Connection, len(networks)) {
+		conn := conn
 		log.Println("Setting up", networks[i].(string), "connection")
-		connections[i].Setup(bot.Dispatcher, networks[i].(string))
+		conn.Setup(bot.Dispatcher, networks[i].(string))
 	}
 	<-exit
 }
