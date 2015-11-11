@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/arachnist/gorepost/config"
+	cfg "github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
@@ -128,7 +128,7 @@ func (c *Connection) Keeper() {
 		c.quitsend = make(chan struct{}, 1)
 		c.quitrecv = make(chan struct{}, 1)
 		c.quitdispatcher = make(chan struct{}, 1)
-		servers := C.Lookup(context, "Servers").([]interface{})
+		servers := cfg.Lookup(context, "Servers").([]interface{})
 
 		server := servers[rand.Intn(len(servers))].(string)
 		log.Println(c.network, "connecting to", server)
@@ -142,12 +142,12 @@ func (c *Connection) Keeper() {
 			log.Println(c.network, "Initializing IRC connection")
 			c.input <- Message{
 				Command:  "NICK",
-				Trailing: C.Lookup(context, "Nick").(string),
+				Trailing: cfg.Lookup(context, "Nick").(string),
 			}
 			c.input <- Message{
 				Command:  "USER",
-				Params:   []string{C.Lookup(context, "User").(string), "0", "*"},
-				Trailing: C.Lookup(context, "RealName").(string),
+				Params:   []string{cfg.Lookup(context, "User").(string), "0", "*"},
+				Trailing: cfg.Lookup(context, "RealName").(string),
 			}
 		} else {
 			log.Println(c.network, "connection error", err.Error())

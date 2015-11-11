@@ -6,11 +6,11 @@ import (
 	"path"
 
 	"github.com/arachnist/gorepost/bot"
-	. "github.com/arachnist/gorepost/config"
+	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
-func FileListFuncBuilder(basedir, common string) func(map[string]string) []string {
+func fileListFuncBuilder(basedir, common string) func(map[string]string) []string {
 	return func(c map[string]string) []string {
 		var r []string
 
@@ -45,15 +45,15 @@ func main() {
 		log.Fatalln("Not a directory:", os.Args[1])
 	}
 
-	C.BuildFileList = FileListFuncBuilder(os.Args[1], "common.json")
+	cfg.SetFileListBuilder(fileListFuncBuilder(os.Args[1], "common.json"))
 
-	logfile, err := os.OpenFile(C.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	logfile, err := os.OpenFile(cfg.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		log.Fatalln("Error opening", C.Lookup(context, "Logpath").(string), "for writing, error:", err.Error())
+		log.Fatalln("Error opening", cfg.Lookup(context, "Logpath").(string), "for writing, error:", err.Error())
 	}
 	log.SetOutput(logfile)
 
-	networks := C.Lookup(context, "Networks").([]interface{})
+	networks := cfg.Lookup(context, "Networks").([]interface{})
 
 	log.Println("Configured networks:", len(networks), networks)
 

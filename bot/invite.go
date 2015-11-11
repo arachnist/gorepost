@@ -12,5 +12,5 @@ func invite(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddCallback("INVITE", "invitki", invite)
+	addCallback("INVITE", "invitki", invite)
 }

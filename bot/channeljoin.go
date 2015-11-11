@@ -3,12 +3,12 @@ package bot
 import (
 	"log"
 
-	. "github.com/arachnist/gorepost/config"
+	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
 func channeljoin(output chan irc.Message, msg irc.Message) {
-	for _, channel := range C.Lookup(msg.Context, "Channels").([]interface{}) {
+	for _, channel := range cfg.Lookup(msg.Context, "Channels").([]interface{}) {
 		log.Println(msg.Context["Network"], "joining channel", channel)
 		output <- irc.Message{
 			Command: "JOIN",
@@ -18,5 +18,5 @@ func channeljoin(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddCallback("001", "channel join", channeljoin)
+	addCallback("001", "channel join", channeljoin)
 }
