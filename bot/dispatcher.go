@@ -18,10 +18,6 @@ func AddCallback(command, name string, callback func(chan irc.Message, irc.Messa
 	Callbacks[strings.ToUpper(command)][strings.ToUpper(name)] = callback
 }
 
-func RemoveCallback(command, name string) {
-	delete(Callbacks[command], name)
-}
-
 func elementInSlice(s []interface{}, e interface{}) bool {
 	for _, se := range s {
 		if se == e {
