@@ -19,5 +19,5 @@ func ping(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
-	AddCallback("PRIVMSG", "ping", ping)
+	AddCallback("PRIVMSG", "msgping", ping)
 }
