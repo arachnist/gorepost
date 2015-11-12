@@ -1,4 +1,7 @@
 // Copyright 2014 Vic Demuzere
+// Later changes by Robert S. Gerus.
+// Original version can be found at
+// https://github.com/sorcix/irc/blob/master/message.go
 //
 // Use of this source code is governed by the MIT license.
 
