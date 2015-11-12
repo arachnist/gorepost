@@ -10,7 +10,7 @@ written in Ruby. The main features are:
  * Gracefully handles connection errors and reconnects.
  * Handles connections to multiple IRC networks and connects to a random IRC
    server from provided list
- * Dynamic configuration inspired by [Puppetlabs Hiera](https://github.com/puppetlabs/hiera)
+ * Dynamic configuration inspired by [Puppetlabs Hiera](https://github.com/puppetlabs/hiera).
    Currently implements only one backend (JSON) and does not support slice
    merging across configuration tiers, but it's getting there.
 
