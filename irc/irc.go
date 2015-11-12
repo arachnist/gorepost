@@ -1,6 +1,9 @@
 // Copyright 2015 Robert S. Gerus. All rights reserved.
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
+
+// Package irc handles IRC connection handling and message parsing/unparsing
+// primitives.
 package irc
 
 import (
@@ -17,6 +20,8 @@ import (
 const delim byte = '\n'
 const endline string = "\r\n"
 
+// Connection struct. Contains basic information about this connection, as well
+// as input/output and quit channels.
 type Connection struct {
 	network        string
 	input          chan Message
@@ -33,6 +38,7 @@ type Connection struct {
 	l              sync.Mutex
 }
 
+// Sender sends IRC messages to server and logs their contents.
 func (c *Connection) Sender() {
 	log.Println(c.network, "spawned Sender")
 	for {
@@ -48,12 +54,15 @@ func (c *Connection) Sender() {
 	}
 }
 
+// Receiver receives IRC messages from server, logs their contents, sets message
+// context and initializes disconnect procedure on timeout or other errors.
 func (c *Connection) Receiver() {
 	log.Println(c.network, "spawned Receiver")
 	for {
 		c.conn.SetReadDeadline(time.Now().Add(time.Second * 600))
 		raw, err := c.reader.ReadString(delim)
 		var src, tgt string
+
 		if err != nil {
 			log.Println(c.network, "error reading message", err.Error())
 			log.Println(c.network, "closing Receiver")
@@ -61,6 +70,7 @@ func (c *Connection) Receiver() {
 			log.Println(c.network, "sent quit message from Receiver")
 			return
 		}
+
 		msg, err := ParseMessage(raw)
 		if err != nil {
 			log.Println(c.network, "error decoding message", err.Error())
@@ -68,9 +78,10 @@ func (c *Connection) Receiver() {
 			c.Quit <- struct{}{}
 			log.Println(c.network, "sent quit message from Receiver")
 			return
-		} else {
-			log.Println(c.network, "<--", msg.String())
 		}
+
+		log.Println(c.network, "<--", msg.String())
+
 		if msg.Params == nil {
 			tgt = ""
 		} else {
@@ -86,6 +97,7 @@ func (c *Connection) Receiver() {
 			"Source":  src,
 			"Target":  tgt,
 		}
+
 		select {
 		case c.output <- *msg:
 		case <-c.quitrecv:
@@ -95,6 +107,8 @@ func (c *Connection) Receiver() {
 	}
 }
 
+// Cleaner cleans up coroutines on IRC connection errors and initializes
+// reconnection.
 func (c *Connection) Cleaner() {
 	log.Println(c.network, "spawned Cleaner")
 	for {
@@ -112,6 +126,8 @@ func (c *Connection) Cleaner() {
 	}
 }
 
+// Keeper makes sure that IRC connection is alive by reconnecting when
+// requested and restarting Sender, Receiver and Dispatcher goroutines.
 func (c *Connection) Keeper() {
 	log.Println(c.network, "spawned Keeper")
 	context := make(map[string]string)
@@ -159,6 +175,7 @@ func (c *Connection) Keeper() {
 	}
 }
 
+// Setup performs initialization tasks.
 func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string) {
 	rand.Seed(time.Now().UnixNano())
 
@@ -173,6 +190,7 @@ func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Mes
 	return
 }
 
+// Dial connects to irc server and sets up bufio reader and writer.
 func (c *Connection) Dial(server string) error {
 	conn, err := net.DialTimeout("tcp", server, time.Second*30)
 	if err != nil {
