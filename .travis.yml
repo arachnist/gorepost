@@ -12,7 +12,7 @@ before_install:
     - go get github.com/arachnist/gorepost/irc
     - go get github.com/arachnist/gorepost/config
 script:
-   - go test -v
+   - go test -v ./...
 matrix:
   allow_failures:
       - go: 1.0
