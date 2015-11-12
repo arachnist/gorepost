@@ -7,12 +7,14 @@ go:
    - 1.4
    - 1.5
    - tip
+env:
+  - "PATH=/home/travis/gopath/bin:$PATH"
+before_install:
+    - go get github.com/arachnist/gorepost/bot
+    - go get github.com/arachnist/gorepost/irc
+    - go get github.com/arachnist/gorepost/config
 script:
    - go test -v
-go_import_path:
-    - github.com/arachnist/gorepost/bot
-    - github.com/arachnist/gorepost/irc
-    - github.com/arachnist/gorepost/config
 matrix:
   allow_failures:
       - go: 1.0
