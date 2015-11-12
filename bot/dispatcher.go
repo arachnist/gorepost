@@ -10,6 +10,7 @@ import (
 
 var callbacks = make(map[string]map[string]func(chan irc.Message, irc.Message))
 
+// addCallback registers callbacks that can be later dispatched by Dispatcher
 func addCallback(command, name string, callback func(chan irc.Message, irc.Message)) {
 	log.Println("adding callback", command, name)
 	if _, ok := callbacks[command]; !ok {
@@ -28,6 +29,10 @@ func elementInSlice(s []interface{}, e interface{}) bool {
 	return false
 }
 
+// Dispatcher takes irc messages and dispatches them to registered callbacks.
+//
+// It will take a message from input channel, check (based on message context)
+// if the message should be dispatched and passes it to registered callback.
 func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Message) {
 	log.Println("spawned Dispatcher")
 	for {

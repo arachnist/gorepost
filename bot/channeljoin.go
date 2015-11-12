@@ -7,6 +7,8 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
+// channeljoin joins configured IRC channels when IRC server confirms we're good
+// to go.
 func channeljoin(output chan irc.Message, msg irc.Message) {
 	for _, channel := range cfg.Lookup(msg.Context, "Channels").([]interface{}) {
 		log.Println(msg.Context["Network"], "joining channel", channel)
