@@ -1,4 +1,4 @@
-nguage: go
+language: go
 go:
    - 1.0
    - 1.1
@@ -9,6 +9,10 @@ go:
    - tip
 script:
    - go test -v
+go_import_path:
+    - github.com/arachnist/gorepost/bot
+    - github.com/arachnist/gorepost/irc
+    - github.com/arachnist/gorepost/config
 matrix:
   allow_failures:
       - go: 1.0
