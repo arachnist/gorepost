@@ -2,8 +2,6 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// Package bot file channeljoin.go contains channeljoin callback which joins
-// configured IRC channels on successful connection
 package bot
 
 import (

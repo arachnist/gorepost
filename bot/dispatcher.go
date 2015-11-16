@@ -2,7 +2,6 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// Package bot file dispatcher.go - main file for this package
 package bot
 
 import (
