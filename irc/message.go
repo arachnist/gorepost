@@ -171,7 +171,7 @@ func ParseMessage(raw string) (m *Message, err error) {
 
 	// Ignore empty messages.
 	if raw = strings.TrimFunc(raw, cutsetFunc); len(raw) < 2 {
-		return nil, errors.New("Empty message")
+		return nil, errors.New("empty message")
 	}
 
 	i, j := 0, 0
@@ -185,7 +185,7 @@ func ParseMessage(raw string) (m *Message, err error) {
 
 		// Prefix string must not be empty if the indicator is present.
 		if i < 2 {
-			return nil, errors.New("Prefix string must not be empty if the indicator is present")
+			return nil, errors.New("prefix string must not be empty if the indicator is present")
 		}
 
 		m.Prefix = ParsePrefix(raw[1:i])
