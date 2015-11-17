@@ -1,4 +1,4 @@
-// +build go1.4
+// +build go1.2,!go1.4
 
 package bot
 
@@ -121,7 +121,6 @@ func configLookupHelper(map[string]string) []string {
 	return []string{".testconfig.json"}
 }
 
-func TestMain(m *testing.M) {
+func init() {
 	cfg.SetFileListBuilder(configLookupHelper)
-	os.Exit(m.Run())
 }
