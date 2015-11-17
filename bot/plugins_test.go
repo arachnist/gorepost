@@ -115,11 +115,19 @@ func TestPlugins(t *testing.T) {
 	}
 }
 
+func configLookupHelper(map[string]string) []string {
+	return []string{".testconfig.json"}
+}
+
+// +build go1.4
+
 func TestMain(m *testing.M) {
 	cfg.SetFileListBuilder(configLookupHelper)
 	os.Exit(m.Run())
 }
 
-func configLookupHelper(map[string]string) []string {
-	return []string{".testconfig.json"}
+// +build go1.2,!go1.4
+
+func init() {
+	cfg.SetFileListBuilder(configLookupHelper)
 }
