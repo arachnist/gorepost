@@ -123,14 +123,3 @@ func TestMain(m *testing.M) {
 func configLookupHelper(map[string]string) []string {
 	return []string{".testconfig.json"}
 }
-
-func eventCollector(quit chan struct{}, input chan irc.Message) (r []irc.Message) {
-	for {
-		select {
-		case msg := <-input:
-			r = append(r, msg)
-		case <-quit:
-			return r
-		}
-	}
-}
