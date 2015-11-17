@@ -19,21 +19,19 @@ const delim byte = '\n'
 const endline string = "\r\n"
 
 // Connection struct. Contains basic information about this connection, as well
-// as input/output and quit channels.
+// as input and quit channels.
 type Connection struct {
-	network        string
-	input          chan Message
-	output         chan Message
-	reader         *bufio.Reader
-	writer         *bufio.Writer
-	dispatcher     func(chan struct{}, chan Message, chan Message)
-	conn           net.Conn
-	reconnect      chan struct{}
-	Quit           chan struct{}
-	quitsend       chan struct{}
-	quitrecv       chan struct{}
-	quitdispatcher chan struct{}
-	l              sync.Mutex
+	network    string
+	input      chan Message
+	reader     *bufio.Reader
+	writer     *bufio.Writer
+	dispatcher func(chan Message, Message)
+	conn       net.Conn
+	reconnect  chan struct{}
+	Quit       chan struct{}
+	quitsend   chan struct{}
+	quitrecv   chan struct{}
+	l          sync.Mutex
 }
 
 // Sender sends IRC messages to server and logs their contents.
@@ -96,11 +94,12 @@ func (c *Connection) Receiver() {
 			"Target":  tgt,
 		}
 
+		c.dispatcher(c.input, *msg)
 		select {
-		case c.output <- *msg:
 		case <-c.quitrecv:
 			log.Println(c.network, "closing Receiver")
 			return
+		default:
 		}
 	}
 }
@@ -116,7 +115,6 @@ func (c *Connection) Cleaner() {
 		log.Println(c.network, "cleaning up!")
 		c.quitsend <- struct{}{}
 		c.quitrecv <- struct{}{}
-		c.quitdispatcher <- struct{}{}
 		c.reconnect <- struct{}{}
 		c.conn.Close()
 		log.Println(c.network, "closing Cleaner")
@@ -135,16 +133,12 @@ func (c *Connection) Keeper() {
 		c.l.Lock()
 		if c.input != nil {
 			close(c.input)
-			close(c.output)
 			close(c.quitsend)
 			close(c.quitrecv)
-			close(c.quitdispatcher)
 		}
 		c.input = make(chan Message, 1)
-		c.output = make(chan Message, 1)
 		c.quitsend = make(chan struct{}, 1)
 		c.quitrecv = make(chan struct{}, 1)
-		c.quitdispatcher = make(chan struct{}, 1)
 		servers := cfg.Lookup(context, "Servers").([]interface{})
 
 		server := servers[rand.Intn(len(servers))].(string)
@@ -154,7 +148,6 @@ func (c *Connection) Keeper() {
 		if err == nil {
 			go c.Sender()
 			go c.Receiver()
-			go c.dispatcher(c.quitdispatcher, c.input, c.output)
 
 			log.Println(c.network, "Initializing IRC connection")
 			c.input <- Message{
@@ -174,7 +167,7 @@ func (c *Connection) Keeper() {
 }
 
 // Setup performs initialization tasks.
-func (c *Connection) Setup(dispatcher func(chan struct{}, chan Message, chan Message), network string) {
+func (c *Connection) Setup(dispatcher func(chan Message, Message), network string) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)

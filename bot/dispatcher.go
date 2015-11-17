@@ -37,29 +37,20 @@ func elementInSlice(s []interface{}, e interface{}) bool {
 //
 // It will take a message from input channel, check (based on message context)
 // if the message should be dispatched and passes it to registered callback.
-func Dispatcher(quit chan struct{}, output chan irc.Message, input chan irc.Message) {
-	log.Println("spawned Dispatcher")
-	for {
-		select {
-		case msg := <-input:
-			if msg.Context["Source"] != "" {
-				if elementInSlice(cfg.Lookup(msg.Context, "Ignore").([]interface{}), msg.Context["Source"]) {
-					log.Println("Context:", msg.Context, "Ignoring", msg.Context["Source"])
-					continue
-				}
-			}
-			if callbacks[msg.Command] != nil {
-				for i, f := range callbacks[msg.Command] {
-					if elementInSlice(cfg.Lookup(msg.Context, "DisabledPlugins").([]interface{}), i) {
-						log.Println("Context:", msg.Context, "Plugin disabled", i)
-						continue
-					}
-					go f(output, msg)
-				}
-			}
-		case <-quit:
-			log.Println("closing Dispatcher")
+func Dispatcher(output chan irc.Message, input irc.Message) {
+	if input.Context["Source"] != "" {
+		if elementInSlice(cfg.Lookup(input.Context, "Ignore").([]interface{}), input.Context["Source"]) {
+			log.Println("Context:", input.Context, "Ignoring", input.Context["Source"])
 			return
+		}
+	}
+	if callbacks[input.Command] != nil {
+		for i, f := range callbacks[input.Command] {
+			if elementInSlice(cfg.Lookup(input.Context, "DisabledPlugins").([]interface{}), i) {
+				log.Println("Context:", input.Context, "Plugin disabled", i)
+				return
+			}
+			go f(output, input)
 		}
 	}
 }
