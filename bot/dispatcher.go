@@ -35,8 +35,8 @@ func elementInSlice(s []interface{}, e interface{}) bool {
 
 // Dispatcher takes irc messages and dispatches them to registered callbacks.
 //
-// It will take a message from input channel, check (based on message context)
-// if the message should be dispatched and passes it to registered callback.
+// It will take an input message, check (based on message context), if the
+// message should be dispatched, and passes it to registered callback.
 func Dispatcher(output chan irc.Message, input irc.Message) {
 	if input.Context["Source"] != "" {
 		if elementInSlice(cfg.Lookup(input.Context, "Ignore").([]interface{}), input.Context["Source"]) {
