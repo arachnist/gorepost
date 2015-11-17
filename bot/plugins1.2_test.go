@@ -3,7 +3,6 @@
 package bot
 
 import (
-	"os"
 	"reflect"
 	"sync"
 	"testing"
