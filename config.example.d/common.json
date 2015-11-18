@@ -1,10 +1,10 @@
 {
  "Nick":"gorepost",
  "Host":"my.hostname",
- "RealName":"https://github.com/arachnist/gorepost",
+ "RealName":"https://github.com/gorepost/gorepost",
  "User":"repost",
  "Networks":["freenode", "ircnet"],
- "Logpath":"/home/arachnist/.gorepost/gorepost.log",
- "ConfigDir":"/home/arachnist/.gorepost/config.d",
+ "Logpath":"/home/gorepost/.gorepost/gorepost.log",
+ "ConfigDir":"/home/gorepost/.gorepost/config.d",
  "Ignore":[""]
 }
