@@ -3,8 +3,8 @@
 package bot
 
 import (
+	"fmt"
 	"os"
-	"reflect"
 	"sync"
 	"testing"
 
@@ -109,7 +109,7 @@ func TestPlugins(t *testing.T) {
 		wg.Wait()
 		quitCollector <- struct{}{}
 
-		if !reflect.DeepEqual(r, e.expectedOut) {
+		if fmt.Sprintf("%+v", r) != fmt.Sprintf("%+v", e.expectedOut) {
 			t.Logf("expected: %+v\n", e.expectedOut)
 			t.Logf("result: %+v\n", r)
 			t.Fail()
