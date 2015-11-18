@@ -4,7 +4,6 @@ package bot
 
 import (
 	"fmt"
-	"io/ioutils"
 	"log"
 	"sync"
 	"testing"
@@ -118,11 +117,15 @@ func TestPlugins(t *testing.T) {
 	}
 }
 
+type nullWriter int
+
+func (nullWriter) Write([]byte) (int, error) { return 0, nil }
+
 func configLookupHelper(map[string]string) []string {
 	return []string{".testconfig.json"}
 }
 
 func init() {
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(nullWriter)
 	cfg.SetFileListBuilder(configLookupHelper)
 }
