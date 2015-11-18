@@ -34,12 +34,26 @@ func Dispatcher(output chan irc.Message, input irc.Message) {
 	}
 
 	if callbacks[input.Command] != nil {
-		for i, f := range callbacks[input.Command] {
-			if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
-				log.Println("Context:", input.Context, "Plugin disabled", i)
-				return
+		if cfg.LookupStringMap(input.Context, "WhitelistedPlugins") != nil {
+			for i, f := range callbacks[input.Command] {
+				if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
+					log.Println("Context:", input.Context, "Plugin disabled", i)
+					return
+				}
+				if _, ok := cfg.LookupStringMap(input.Context, "WhitelistedPlugins")[i]; ok {
+					go f(output, input)
+				} else {
+					log.Println("Context:", input.Context, "Plugin not whitelisted", i)
+				}
 			}
-			go f(output, input)
+		} else {
+			for i, f := range callbacks[input.Command] {
+				if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
+					log.Println("Context:", input.Context, "Plugin disabled", i)
+					return
+				}
+				go f(output, input)
+			}
 		}
 	}
 }
