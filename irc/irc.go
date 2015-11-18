@@ -21,17 +21,19 @@ const endline string = "\r\n"
 // Connection struct. Contains basic information about this connection, as well
 // as input and quit channels.
 type Connection struct {
-	network    string
-	input      chan Message
-	reader     *bufio.Reader
-	writer     *bufio.Writer
-	dispatcher func(chan Message, Message)
-	conn       net.Conn
-	reconnect  chan struct{}
-	Quit       chan struct{}
-	quitsend   chan struct{}
-	quitrecv   chan struct{}
-	l          sync.Mutex
+	network          string
+	input            chan Message
+	reader           *bufio.Reader
+	writer           *bufio.Writer
+	dispatcher       func(chan Message, Message)
+	conn             net.Conn
+	reconnect        chan struct{}
+	reconnectCleanup chan struct{}
+	Quit             chan struct{}
+	quitsend         chan struct{}
+	quitrecv         chan struct{}
+	quitkeeper       chan struct{}
+	l                sync.Mutex
 }
 
 // Sender sends IRC messages to server and logs their contents.
@@ -62,8 +64,8 @@ func (c *Connection) Receiver() {
 		if err != nil {
 			log.Println(c.network, "error reading message", err.Error())
 			log.Println(c.network, "closing Receiver")
-			c.Quit <- struct{}{}
-			log.Println(c.network, "sent quit message from Receiver")
+			c.reconnectCleanup <- struct{}{}
+			log.Println(c.network, "sent reconnect message from Receiver")
 			return
 		}
 
@@ -71,8 +73,8 @@ func (c *Connection) Receiver() {
 		if err != nil {
 			log.Println(c.network, "error decoding message", err.Error())
 			log.Println(c.network, "closing Receiver")
-			c.Quit <- struct{}{}
-			log.Println(c.network, "sent quit message from Receiver")
+			c.reconnectCleanup <- struct{}{}
+			log.Println(c.network, "sent reconnect message from Receiver")
 			return
 		}
 
@@ -109,16 +111,28 @@ func (c *Connection) Receiver() {
 func (c *Connection) Cleaner() {
 	log.Println(c.network, "spawned Cleaner")
 	for {
-		<-c.Quit
-		log.Println(c.network, "received quit message")
-		c.l.Lock()
-		log.Println(c.network, "cleaning up!")
-		c.quitsend <- struct{}{}
-		c.quitrecv <- struct{}{}
-		c.reconnect <- struct{}{}
-		c.conn.Close()
-		log.Println(c.network, "closing Cleaner")
-		c.l.Unlock()
+		select {
+		case <-c.Quit:
+			log.Println(c.network, "closing connection")
+			c.l.Lock()
+			defer c.l.Unlock()
+			log.Println(c.network, "cleaning up!")
+			c.quitsend <- struct{}{}
+			c.quitrecv <- struct{}{}
+			c.conn.Close()
+			log.Println(c.network, "closing Cleaner")
+			return
+		case <-c.reconnectCleanup:
+			log.Println(c.network, "cleaning up before reconnect!")
+			c.l.Lock()
+			log.Println(c.network, "cleaning up!")
+			c.quitsend <- struct{}{}
+			c.quitrecv <- struct{}{}
+			c.conn.Close()
+			log.Println(c.network, "sending reconnect signal!")
+			c.l.Unlock()
+			c.reconnect <- struct{}{}
+		}
 	}
 }
 
@@ -129,7 +143,17 @@ func (c *Connection) Keeper() {
 	context := make(map[string]string)
 	context["Network"] = c.network
 	for {
-		<-c.reconnect
+		select {
+		case <-c.quitkeeper:
+			if c.input != nil {
+				close(c.input)
+				close(c.quitsend)
+				close(c.quitrecv)
+			}
+			return
+		case <-c.reconnect:
+		}
+
 		c.l.Lock()
 		if c.input != nil {
 			close(c.input)
@@ -171,6 +195,8 @@ func (c *Connection) Setup(dispatcher func(chan Message, Message), network strin
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)
+	c.reconnectCleanup = make(chan struct{}, 1)
+	c.quitkeeper = make(chan struct{}, 1)
 	c.Quit = make(chan struct{}, 1)
 	c.network = network
 	c.dispatcher = dispatcher
