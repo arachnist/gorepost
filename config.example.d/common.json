@@ -4,7 +4,5 @@
  "RealName":"https://github.com/gorepost/gorepost",
  "User":"repost",
  "Networks":["freenode", "ircnet"],
- "Logpath":"/home/gorepost/.gorepost/gorepost.log",
- "ConfigDir":"/home/gorepost/.gorepost/config.d",
- "Ignore":[""]
+ "Logpath":"/home/gorepost/.gorepost/gorepost.log"
 }
