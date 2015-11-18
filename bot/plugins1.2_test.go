@@ -4,6 +4,8 @@ package bot
 
 import (
 	"fmt"
+	"io/ioutils"
+	"log"
 	"sync"
 	"testing"
 
@@ -121,5 +123,6 @@ func configLookupHelper(map[string]string) []string {
 }
 
 func init() {
+	log.SetOutput(ioutil.Discard)
 	cfg.SetFileListBuilder(configLookupHelper)
 }
