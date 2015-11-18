@@ -2,7 +2,5 @@
     "Channels":[
         "#testchan-1",
         "#testchan-2"
-    ],
-    "Ignore":[],
-    "DisabledPlugins":[]
+    ]
 }
