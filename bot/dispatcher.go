@@ -23,30 +23,19 @@ func addCallback(command, name string, callback func(chan irc.Message, irc.Messa
 	callbacks[strings.ToUpper(command)][strings.ToUpper(name)] = callback
 }
 
-func elementInSlice(s []string, e string) bool {
-	for _, se := range s {
-		if se == e {
-			return true
-		}
-	}
-
-	return false
-}
-
 // Dispatcher takes irc messages and dispatches them to registered callbacks.
 //
 // It will take an input message, check (based on message context), if the
 // message should be dispatched, and passes it to registered callback.
 func Dispatcher(output chan irc.Message, input irc.Message) {
-	if input.Context["Source"] != "" {
-		if elementInSlice(cfg.LookupStringSlice(input.Context, "Ignore"), input.Context["Source"]) {
-			log.Println("Context:", input.Context, "Ignoring", input.Context["Source"])
-			return
-		}
+	if _, ok := cfg.LookupStringMap(input.Context, "Ignore")[input.Context["Source"]]; ok {
+		log.Println("Context:", input.Context, "Ignoring", input.Context["Source"])
+		return
 	}
+
 	if callbacks[input.Command] != nil {
 		for i, f := range callbacks[input.Command] {
-			if elementInSlice(cfg.LookupStringSlice(input.Context, "DisabledPlugins"), i) {
+			if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
 				log.Println("Context:", input.Context, "Plugin disabled", i)
 				return
 			}
