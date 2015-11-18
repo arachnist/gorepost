@@ -52,20 +52,20 @@ func main() {
 
 	cfg.SetFileListBuilder(fileListFuncBuilder(os.Args[1], "common.json"))
 
-	logfile, err := os.OpenFile(cfg.Lookup(context, "Logpath").(string), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+	logfile, err := os.OpenFile(cfg.LookupString(context, "Logpath"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
-		log.Fatalln("Error opening", cfg.Lookup(context, "Logpath").(string), "for writing, error:", err.Error())
+		log.Fatalln("Error opening", cfg.LookupString(context, "Logpath"), "for writing, error:", err.Error())
 	}
 	log.SetOutput(logfile)
 
-	networks := cfg.Lookup(context, "Networks").([]interface{})
+	networks := cfg.LookupStringSlice(context, "Networks")
 
 	log.Println("Configured networks:", len(networks), networks)
 
 	for i, conn := range make([]irc.Connection, len(networks)) {
 		conn := conn
-		log.Println("Setting up", networks[i].(string), "connection")
-		conn.Setup(bot.Dispatcher, networks[i].(string))
+		log.Println("Setting up", networks[i], "connection")
+		conn.Setup(bot.Dispatcher, networks[i])
 	}
 	<-exit
 }
