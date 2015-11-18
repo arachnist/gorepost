@@ -139,9 +139,9 @@ func (c *Connection) Keeper() {
 		c.input = make(chan Message, 1)
 		c.quitsend = make(chan struct{}, 1)
 		c.quitrecv = make(chan struct{}, 1)
-		servers := cfg.Lookup(context, "Servers").([]interface{})
+		servers := cfg.LookupStringSlice(context, "Servers")
 
-		server := servers[rand.Intn(len(servers))].(string)
+		server := servers[rand.Intn(len(servers))]
 		log.Println(c.network, "connecting to", server)
 		err := c.Dial(server)
 		c.l.Unlock()
@@ -152,12 +152,12 @@ func (c *Connection) Keeper() {
 			log.Println(c.network, "Initializing IRC connection")
 			c.input <- Message{
 				Command:  "NICK",
-				Trailing: cfg.Lookup(context, "Nick").(string),
+				Trailing: cfg.LookupString(context, "Nick"),
 			}
 			c.input <- Message{
 				Command:  "USER",
-				Params:   []string{cfg.Lookup(context, "User").(string), "0", "*"},
-				Trailing: cfg.Lookup(context, "RealName").(string),
+				Params:   []string{cfg.LookupString(context, "User"), "0", "*"},
+				Trailing: cfg.LookupString(context, "RealName"),
 			}
 		} else {
 			log.Println(c.network, "connection error", err.Error())
