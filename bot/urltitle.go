@@ -42,7 +42,10 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 		}
 
 		if b {
-			r = append(r, getUrlTitle(s))
+			t := getUrlTitle(s)
+			if t != "no title" {
+				r = append(r, getUrlTitle(s))
+			}
 		}
 	}
 
