@@ -80,6 +80,25 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{ // "nickserv"
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "This nickname is registered. Please choose a different nickname, or identify via …",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"NickServ"},
+				Trailing: "IDENTIFY test_password",
+			},
+		},
+	},
 	{ // non-matching
 		in: irc.Message{
 			Command:  "PRIVMSG",
