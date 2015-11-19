@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/arachnist/gorepost/irc"
 )
@@ -27,6 +28,8 @@ type checkinator struct {
 func at(output chan irc.Message, msg irc.Message) {
 	var rmsg string
 	var values checkinator
+	var now []string
+	var recently []string
 
 	if strings.Split(msg.Trailing, " ")[0] != ":at" {
 		return
@@ -44,7 +47,34 @@ func at(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	rmsg = fmt.Sprintf("%+v", values)
+	rmsg = "at:"
+
+	for _, u := range values.Users {
+		t := time.Unix(int64(u.Timestamp), 0)
+		if t.Add(time.Minute * 10).After(time.Now()) {
+			now = append(now, u.Login)
+		} else {
+			recently = append(recently, u.Login)
+		}
+	}
+
+	if len(now) > 0 {
+		rmsg += " now: "
+		rmsg += strings.Join(now, ", ")
+	}
+	if len(recently) > 0 {
+		rmsg += " recently: "
+		rmsg += strings.Join(recently, ", ")
+	}
+	if len(now) == 0 && len(recently) == 0 {
+		rmsg += " Wieje sandałem, z masłem"
+	}
+	if values.Kektops > 0 {
+		rmsg += fmt.Sprintf("; kektops: %d", values.Kektops)
+	}
+	if values.Unknown > 0 {
+		rmsg += fmt.Sprintf("; unknown: %d", values.Unknown)
+	}
 
 	output <- reply(msg, rmsg)
 }
