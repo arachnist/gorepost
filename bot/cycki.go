@@ -6,12 +6,13 @@ package bot
 
 import (
 	"fmt"
-	"math/rand"
+	"regexp"
 	"strings"
-	"time"
 
 	"github.com/arachnist/gorepost/irc"
 )
+
+var stripCycki *regexp.Regexp
 
 func cycki(output chan irc.Message, msg irc.Message) {
 	var rmsg string
@@ -20,17 +21,17 @@ func cycki(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	img, err := httpGetXpath("http://www.bonjourmadame.fr/page/"+string(rand.Intn(2370)+1), "//div[@class='photo post']//img/@src")
+	img, err := httpGetXpath("http://oboobs.ru/random/", "//img/@src")
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
 	} else {
-		rmsg = "bonjour (nsfw): " + img
+		rmsg = "bonjour (nsfw): " + string(stripCycki.ReplaceAll([]byte(img), []byte("")))
 	}
 
 	output <- reply(msg, rmsg)
 }
 
 func init() {
-	rand.Seed(time.Now().UnixNano())
-	addCallback("PRIVMSG", "bonjour", cycki)
+	stripCycki, _ = regexp.Compile("_preview")
+	addCallback("PRIVMSG", "cycki", cycki)
 }
