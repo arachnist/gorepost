@@ -2,7 +2,7 @@
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
 
-// +build go1.4
+// +build go1.2,!go1.4
 
 package irc
 
@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"sync"
 	"testing"
 	"time"
@@ -143,8 +142,7 @@ func configLookupHelper(map[string]string) []string {
 	return []string{".testconfig.json"}
 }
 
-func TestMain(m *testing.M) {
+func init() {
 	cfg.SetFileListBuilder(configLookupHelper)
 	log.SetOutput(ioutil.Discard)
-	os.Exit(m.Run())
 }
