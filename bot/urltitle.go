@@ -49,19 +49,7 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 	if len(r) > 0 {
 		t := cfg.LookupString(msg.Context, "LinkTitlePrefix") + strings.Join(r, cfg.LookupString(msg.Context, "LinkTitleDelimiter"))
 
-		if msg.Params[0] == cfg.LookupString(msg.Context, "Nick") {
-			output <- irc.Message{
-				Command:  "PRIVMSG",
-				Params:   []string{msg.Prefix.Name},
-				Trailing: t,
-			}
-		} else {
-			output <- irc.Message{
-				Command:  "PRIVMSG",
-				Params:   msg.Params,
-				Trailing: t,
-			}
-		}
+		output <- reply(msg, t)
 	}
 }
 
