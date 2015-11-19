@@ -7,15 +7,9 @@ package bot
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
 	"regexp"
 	"strings"
-	"time"
-
-	"github.com/moovweb/gokogiri"
-	"github.com/moovweb/gokogiri/xpath"
 
 	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
@@ -24,48 +18,14 @@ import (
 var trimTitle *regexp.Regexp
 
 func getUrlTitle(l string) string {
-	var buf []byte
-	tr := &http.Transport{
-		TLSHandshakeTimeout:   5 * time.Second,
-		ResponseHeaderTimeout: 5 * time.Second,
-	}
-	client := &http.Client{Transport: tr}
-
-	resp, err := client.Get(l)
-	if err != nil {
-		return fmt.Sprintf("error:", err)
-	}
-
-	// 5MiB
-	if resp.ContentLength > 5*1024*1024 || resp.ContentLength < 0 {
-		buf = make([]byte, 5*1024*1024)
-	} else if resp.ContentLength == 0 {
-		return "empty"
-	} else {
-		buf = make([]byte, resp.ContentLength)
-	}
-
-	i, err := io.ReadFull(resp.Body, buf)
-	if err == io.ErrUnexpectedEOF {
-		buf = buf[:i]
+	title, err := httpGetXpath(l, "//head/title")
+	if err == elementNotFound {
+		return "no title"
 	} else if err != nil {
 		return fmt.Sprintf("error:", err)
 	}
 
-	doc, err := gokogiri.ParseHtml(buf)
-	defer doc.Free()
-	if err != nil {
-		return fmt.Sprintf("error:", err)
-	}
-
-	xpath := xpath.Compile("//head/title")
-	sr, err := doc.Root().Search(xpath)
-
-	if len(sr) > 0 {
-		return string(trimTitle.ReplaceAll([]byte(sr[0].InnerHtml()), []byte{' '})[:])
-	} else {
-		return "no title"
-	}
+	return string(trimTitle.ReplaceAll([]byte(title), []byte{' '})[:])
 }
 
 func linktitle(output chan irc.Message, msg irc.Message) {
