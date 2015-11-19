@@ -13,6 +13,7 @@ import (
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
@@ -95,25 +96,27 @@ func TestPlugins(t *testing.T) {
 	var r []irc.Message
 	var wg sync.WaitGroup
 
+	go func(quit chan struct{}, input chan irc.Message) {
+		for {
+			select {
+			case msg := <-input:
+				wg.Done()
+				r = append(r, msg)
+			case <-quit:
+			}
+		}
+	}(quitCollector, output)
+
 	for _, e := range eventTests {
 		r = r[:0]
 
 		wg.Add(len(e.expectedOut))
-		go func(quit chan struct{}, input chan irc.Message) {
-			for {
-				select {
-				case msg := <-input:
-					wg.Done()
-					r = append(r, msg)
-				case <-quit:
-				}
-			}
-		}(quitCollector, output)
 
 		Dispatcher(output, e.in)
 
+		time.Sleep(3000000 * time.Nanosecond)
+
 		wg.Wait()
-		quitCollector <- struct{}{}
 
 		if fmt.Sprintf("%+v", r) != fmt.Sprintf("%+v", e.expectedOut) {
 			t.Logf("expected: %+v\n", e.expectedOut)
@@ -121,6 +124,8 @@ func TestPlugins(t *testing.T) {
 			t.Fail()
 		}
 	}
+
+	quitCollector <- struct{}{}
 }
 
 func configLookupHelper(map[string]string) []string {
