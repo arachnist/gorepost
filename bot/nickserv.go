@@ -70,7 +70,12 @@ func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	for _, channel := range cfg.LookupStringSlice(msg.Context, "SecuredChannels") {
+	channels := cfg.LookupStringSlice(msg.Context, "SecuredChannels")
+	if len(channels) < 1 {
+		return
+	}
+
+	for _, channel := range channels {
 		log.Println(msg.Context["Network"], "joining channel", channel)
 		output <- irc.Message{
 			Command: "JOIN",
