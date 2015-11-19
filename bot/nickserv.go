@@ -46,6 +46,40 @@ func nickserv(output chan irc.Message, msg irc.Message) {
 	}
 }
 
+func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
+	if msg.Prefix.String() != cfg.LookupString(msg.Context, "NickServPrefix") {
+		log.Println("Context:", msg.Context, "Someone is spoofing nickserv!")
+		return
+	}
+
+	regexStr := cfg.LookupString(msg.Context, "NickServRegexOK")
+	if regexStr == "" {
+		regexStr = "^You are now identified"
+	}
+
+	buffer := new(bytes.Buffer)
+	buffer.WriteString(msg.Trailing)
+
+	b, err := regexp.Match(regexStr, buffer.Bytes())
+	if err != nil {
+		log.Println("Context:", msg.Context, "NickServ regex error:", err)
+		return
+	}
+
+	if !b {
+		return
+	}
+
+	for _, channel := range cfg.LookupStringSlice(msg.Context, "SecuredChannels") {
+		log.Println(msg.Context["Network"], "joining channel", channel)
+		output <- irc.Message{
+			Command: "JOIN",
+			Params:  []string{channel},
+		}
+	}
+}
+
 func init() {
 	addCallback("NOTICE", "nickserv", nickserv)
+	addCallback("NOTICE", "join +i-only channels", joinsecuredchannels)
 }
