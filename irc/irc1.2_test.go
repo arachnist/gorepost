@@ -1,11 +1,11 @@
-// Copyright 2015 Robert S. Gerus. All rights reserved.
-// Use of this source code is governed by a MIT-style
-// license that can be found in the LICENSE file.
-
 // These tests don't build for now at go1.3, but it's almoast 2AM and i need
 // some sleep.
 // They fail at "for range []int{0, 2} {" and such.
 // +build ignore
+
+// Copyright 2015 Robert S. Gerus. All rights reserved.
+// Use of this source code is governed by a MIT-style
+// license that can be found in the LICENSE file.
 
 package irc
 
