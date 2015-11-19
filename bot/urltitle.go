@@ -21,6 +21,8 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
+var trimTitle *regexp.Regexp
+
 func getUrlTitle(l string) string {
 	var buf []byte
 	tr := &http.Transport{
@@ -60,7 +62,7 @@ func getUrlTitle(l string) string {
 	sr, err := doc.Root().Search(xpath)
 
 	if len(sr) > 0 {
-		return sr[0].InnerHtml()
+		return string(trimTitle.ReplaceAll([]byte(sr[0].InnerHtml()), []byte{' '})[:])
 	} else {
 		return "no title"
 	}
@@ -85,10 +87,7 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 	}
 
 	if len(r) > 0 {
-		t := strings.Join(
-			append([]string{cfg.LookupString(msg.Context, "LinkTitlePrefix")}, r...),
-			cfg.LookupString(msg.Context, "LinkTitleDelimiter"),
-		)
+		t := cfg.LookupString(msg.Context, "LinkTitlePrefix") + strings.Join(r, cfg.LookupString(msg.Context, "LinkTitleDelimiter"))
 
 		if msg.Params[0] == cfg.LookupString(msg.Context, "Nick") {
 			output <- irc.Message{
@@ -107,5 +106,6 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 }
 
 func init() {
+	trimTitle, _ = regexp.Compile("[\\s]+")
 	addCallback("PRIVMSG", "LINKTITLE", linktitle)
 }
