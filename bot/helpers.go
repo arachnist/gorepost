@@ -12,6 +12,9 @@ import (
 
 	"github.com/moovweb/gokogiri"
 	"github.com/moovweb/gokogiri/xpath"
+
+	cfg "github.com/arachnist/gorepost/config"
+	"github.com/arachnist/gorepost/irc"
 )
 
 var elementNotFound = errors.New("Element not found in document")
@@ -70,5 +73,21 @@ func httpGetXpath(l, x string) (string, error) {
 		return sr[0].InnerHtml(), nil
 	} else {
 		return "", elementNotFound
+	}
+}
+
+func reply(msg irc.Message, text string) irc.Message {
+	if msg.Params[0] == cfg.LookupString(msg.Context, "Nick") {
+		return irc.Message{
+			Command:  "PRIVMSG",
+			Params:   []string{msg.Prefix.Name},
+			Trailing: text,
+		}
+	} else {
+		return irc.Message{
+			Command:  "PRIVMSG",
+			Params:   msg.Params,
+			Trailing: text,
+		}
 	}
 }
