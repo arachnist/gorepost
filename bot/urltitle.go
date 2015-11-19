@@ -45,7 +45,6 @@ func getUrlTitle(l string) string {
 
 	i, err := io.ReadFull(resp.Body, buf)
 	if err == io.ErrUnexpectedEOF {
-		fmt.Println("read", i, "bytes")
 		buf = buf[:i]
 	} else if err != nil {
 		return fmt.Sprintf("error:", err)
@@ -57,10 +56,14 @@ func getUrlTitle(l string) string {
 		return fmt.Sprintf("error:", err)
 	}
 
-	xpath := xpath.Compile("/head/title")
+	xpath := xpath.Compile("//head/title")
 	sr, err := doc.Root().Search(xpath)
 
-	return sr[0].InnerHtml()
+	if len(sr) > 0 {
+		return sr[0].InnerHtml()
+	} else {
+		return "no title"
+	}
 }
 
 func linktitle(output chan irc.Message, msg irc.Message) {
@@ -68,7 +71,7 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 
 	for _, s := range strings.Split(msg.Trailing, " ") {
 		buffer := new(bytes.Buffer)
-		buffer.WriteString(msg.Trailing)
+		buffer.WriteString(s)
 
 		b, err := regexp.Match("https?://", buffer.Bytes())
 		if err != nil {
