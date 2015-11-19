@@ -1,0 +1,6 @@
+{
+    "NickServRegex":"^This nickname is registered. Please choose a different nickname, or identify via.*/msg NickServ identify",
+    "NickServPrefix":"NickServ!NickServ@services.",
+    "NickServPassword":"my_secret_nickserv_password",
+    "SecuredChannels":["#a-secret-invite-only-channel"]
+}
