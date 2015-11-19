@@ -71,7 +71,7 @@ func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
 	}
 
 	channels := cfg.LookupStringSlice(msg.Context, "SecuredChannels")
-	if len(channels) < 1 {
+	if len(channels) < 1 || channels[0] == "" {
 		return
 	}
 
