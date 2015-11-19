@@ -25,7 +25,7 @@ func cycki(output chan irc.Message, msg irc.Message) {
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
 	} else {
-		rmsg = "bonjour (nsfw): " + string(stripCycki.ReplaceAll([]byte(img), []byte("")))
+		rmsg = "cycki (nsfw): " + string(stripCycki.ReplaceAll([]byte(img), []byte("")))
 	}
 
 	output <- reply(msg, rmsg)
