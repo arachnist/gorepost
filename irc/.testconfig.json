@@ -1,0 +1,7 @@
+{
+    "Servers":["127.0.0.1:36667"],
+    "Nick":"gorepost",
+    "Host":"my.hostname",
+    "RealName":"https://github.com/arachnist/gorepost",
+    "User":"repost"
+}
