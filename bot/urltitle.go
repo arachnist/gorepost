@@ -5,7 +5,6 @@
 package bot
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"regexp"
@@ -16,6 +15,7 @@ import (
 )
 
 var trimTitle *regexp.Regexp
+var trimLink *regexp.Regexp
 
 func getURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
@@ -32,14 +32,13 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 	var r []string
 
 	for _, s := range strings.Split(msg.Trailing, " ") {
-		buffer := new(bytes.Buffer)
-		buffer.WriteString(s)
-
-		b, err := regexp.Match("https?://", buffer.Bytes())
+		b, err := regexp.Match("https?://", []byte(s))
 		if err != nil {
 			log.Println("Context:", msg.Context, "linktitle regex error:", err)
 			return
 		}
+
+		s = string(trimLink.ReplaceAll([]byte(s), []byte("http"))[:])
 
 		if b {
 			t := getURLTitle(s)
@@ -58,5 +57,6 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 
 func init() {
 	trimTitle, _ = regexp.Compile("[\\s]+")
+	trimLink, _ = regexp.Compile("^.*?http")
 	addCallback("PRIVMSG", "LINKTITLE", linktitle)
 }
