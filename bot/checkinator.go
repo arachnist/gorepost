@@ -14,9 +14,9 @@ import (
 )
 
 type user struct {
-	Timestamp   float64
-	Login       string
-	Pretty_time string
+	Timestamp  float64
+	Login      string
+	PrettyTime string `json:"pretty_time"`
 }
 
 type checkinator struct {
