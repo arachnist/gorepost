@@ -17,7 +17,7 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-var elementNotFound = errors.New("Element not found in document")
+var errElementNotFound = errors.New("element not found in document")
 
 func httpGet(l string) ([]byte, error) {
 	var buf []byte
@@ -71,9 +71,9 @@ func httpGetXpath(l, x string) (string, error) {
 
 	if len(sr) > 0 {
 		return sr[0].InnerHtml(), nil
-	} else {
-		return "", elementNotFound
 	}
+
+	return "", errElementNotFound
 }
 
 func reply(msg irc.Message, text string) irc.Message {
@@ -83,11 +83,11 @@ func reply(msg irc.Message, text string) irc.Message {
 			Params:   []string{msg.Prefix.Name},
 			Trailing: text,
 		}
-	} else {
-		return irc.Message{
-			Command:  "PRIVMSG",
-			Params:   msg.Params,
-			Trailing: text,
-		}
+	}
+
+	return irc.Message{
+		Command:  "PRIVMSG",
+		Params:   msg.Params,
+		Trailing: text,
 	}
 }

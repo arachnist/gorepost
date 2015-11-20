@@ -13,10 +13,10 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-var notAnError = errors.New("Not an error")
+var errNotReally = errors.New("not an error")
 
 func redirectError(*http.Request, []*http.Request) error {
-	return notAnError
+	return errNotReally
 }
 
 func kotki(output chan irc.Message, msg irc.Message) {

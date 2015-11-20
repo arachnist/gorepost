@@ -17,12 +17,12 @@ import (
 
 var trimTitle *regexp.Regexp
 
-func getUrlTitle(l string) string {
+func getURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
-	if err == elementNotFound {
+	if err == errElementNotFound {
 		return "no title"
 	} else if err != nil {
-		return fmt.Sprintf("error:", err)
+		return fmt.Sprint("error:", err)
 	}
 
 	return string(trimTitle.ReplaceAll([]byte(title), []byte{' '})[:])
@@ -42,9 +42,9 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 		}
 
 		if b {
-			t := getUrlTitle(s)
+			t := getURLTitle(s)
 			if t != "no title" {
-				r = append(r, getUrlTitle(s))
+				r = append(r, t)
 			}
 		}
 	}
