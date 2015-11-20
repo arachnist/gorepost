@@ -5,7 +5,6 @@
 package bot
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"regexp"
@@ -25,10 +24,7 @@ func nickserv(output chan irc.Message, msg irc.Message) {
 		regexStr = "^This nickname is registered"
 	}
 
-	buffer := new(bytes.Buffer)
-	buffer.WriteString(msg.Trailing)
-
-	b, err := regexp.Match(regexStr, buffer.Bytes())
+	b, err := regexp.Match(regexStr, []byte(msg.Trailing))
 	if err != nil {
 		log.Println("Context:", msg.Context, "NickServ regex error:", err)
 		return
@@ -57,10 +53,7 @@ func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
 		regexStr = "^You are now identified"
 	}
 
-	buffer := new(bytes.Buffer)
-	buffer.WriteString(msg.Trailing)
-
-	b, err := regexp.Match(regexStr, buffer.Bytes())
+	b, err := regexp.Match(regexStr, []byte(msg.Trailing))
 	if err != nil {
 		log.Println("Context:", msg.Context, "NickServ regex error:", err)
 		return
