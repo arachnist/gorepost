@@ -21,7 +21,7 @@ func bonjour(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	img, err := httpGetXpath("http://www.bonjourmadame.fr/page/"+string(rand.Intn(2370)+1), "//div[@class='photo post']//img/@src")
+	img, err := httpGetXpath("http://www.bonjourmadame.fr/page/"+fmt.Sprintf("%d", rand.Intn(2370)+1), "//div[@class='photo post']//img/@src")
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
 	} else {
