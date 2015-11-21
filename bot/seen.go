@@ -42,7 +42,7 @@ func seenrecord(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	err = k.Set(msg.Prefix.Name, b)
+	err = k.Set("seen/"+msg.Prefix.Name, b)
 	if err != nil {
 		log.Println("Context:", msg.Context, "error recording seen record:", err)
 	}
@@ -60,7 +60,7 @@ func seen(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	b, err := k.GetBytes(args[1])
+	b, err := k.GetBytes("seen/" + args[1])
 	if err == kt.ErrNotFound {
 		output <- reply(msg, cfg.LookupString(msg.Context, "NotSeenMessage"))
 		return
