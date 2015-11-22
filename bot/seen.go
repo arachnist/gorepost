@@ -28,6 +28,10 @@ type seenRecord struct {
 }
 
 func seenrecord(output chan irc.Message, msg irc.Message) {
+	if msg.Params == nil {
+		return
+	}
+
 	v := seenRecord{
 		Network: msg.Context["Network"],
 		Target:  msg.Params[0],
