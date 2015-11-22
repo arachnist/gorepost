@@ -19,20 +19,20 @@ import (
 
 var k *kt.Conn
 
-type value struct {
+type seenRecord struct {
 	Network string
 	Target  string
 	Action  string
-	Time    int64 // .Now().UnixNano()
+	Time    time.Time
 	Text    string
 }
 
 func seenrecord(output chan irc.Message, msg irc.Message) {
-	v := value{
+	v := seenRecord{
 		Network: msg.Context["Network"],
 		Target:  msg.Params[0],
 		Action:  msg.Command,
-		Time:    time.Now().UnixNano(),
+		Time:    time.Now(),
 		Text:    msg.Trailing,
 	}
 
@@ -49,7 +49,8 @@ func seenrecord(output chan irc.Message, msg irc.Message) {
 }
 
 func seen(output chan irc.Message, msg irc.Message) {
-	var v value
+	var v seenRecord
+	var r string
 
 	args := strings.Split(msg.Trailing, " ")
 
@@ -75,7 +76,20 @@ func seen(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	output <- reply(msg, fmt.Sprintf("%+v", v))
+	r = fmt.Sprintf("Last seen %s on %s/%s at %v ", args[1], v.Network, v.Target, v.Time.Round(time.Minute))
+
+	switch v.Action {
+	case "JOIN":
+		r += "joining"
+	case "PART":
+		r += fmt.Sprint("leaving: ", v.Text)
+	case "QUIT":
+		r += fmt.Sprint("quitting with reasson: ", v.Text)
+	case "PRIVMSG":
+		r += fmt.Sprint("saying: ", v.Text)
+	}
+
+	output <- reply(msg, r)
 }
 
 func init() {
