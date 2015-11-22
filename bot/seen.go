@@ -80,7 +80,7 @@ func seen(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	r = fmt.Sprintf("Last seen %s on %s/%s at %v ", args[1], v.Network, v.Target, v.Time.Round(time.Minute))
+	r = fmt.Sprintf("Last seen %s on %s/%s at %v ", args[1], v.Network, v.Target, v.Time.Round(time.Second))
 
 	switch v.Action {
 	case "JOIN":
