@@ -62,6 +62,9 @@ func httpGetXpath(l, x string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if doc.Root() == nil {
+		return "", errElementNotFound
+	}
 
 	xpath := xpath.Compile(x)
 	sr, err := doc.Root().Search(xpath)
