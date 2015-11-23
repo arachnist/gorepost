@@ -13,6 +13,24 @@ import (
 
 var identified map[string]map[string]string
 
+func IsIdentified(msg irc.Message) bool {
+	if msg.Prefix == nil {
+		return false
+	}
+	if identified == nil {
+		return false
+	}
+	net := msg.Context["Network"]
+	if identified[net] == nil {
+		return false
+	}
+	if identified[net][msg.Prefix.Name] == "" {
+		return false
+	}
+
+	return true
+}
+
 func identify(output chan irc.Message, msg irc.Message) {
 	if strings.Split(msg.Trailing, " ")[0] != ":identify" {
 		return
@@ -43,7 +61,7 @@ func listIdentified(output chan irc.Message, msg irc.Message) {
 		return
 	}
 
-	if cfg.Lookup(msg.Context, "AccessLevel").(int) < 10 {
+	if cfg.LookupInt(msg.Context, "AccessLevel") < 10 {
 		output <- reply(msg, "access denied")
 		return
 	}
