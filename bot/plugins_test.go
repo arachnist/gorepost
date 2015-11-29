@@ -69,6 +69,7 @@ var eventTests = []struct {
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":ping",
+			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{
 				Name: "idontexist",
 			},
@@ -76,7 +77,7 @@ var eventTests = []struct {
 		expectedOut: []irc.Message{
 			{
 				Command:  "PRIVMSG",
-				Params:   []string{"idontexist"},
+				Params:   []string{"#testchan-1"},
 				Trailing: "pingity pong",
 			},
 		},

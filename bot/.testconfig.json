@@ -4,5 +4,6 @@
         "#testchan-2"
     ],
     "NickServPrefix":"NickServ!NickServ@services.",
-    "NickServPassword":"test_password"
+    "NickServPassword":"test_password",
+    "Nick":"gorepost"
 }
