@@ -167,6 +167,7 @@ func (c *Connection) Keeper() {
 			})
 		} else {
 			log.Println(c.network, "connection error", err.Error())
+			time.Sleep(time.Second * 3)
 			c.reconnect <- struct{}{}
 		}
 	}
