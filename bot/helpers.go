@@ -5,9 +5,11 @@
 package bot
 
 import (
+	"bufio"
 	"errors"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/moovweb/gokogiri"
@@ -93,4 +95,19 @@ func reply(msg irc.Message, text string) irc.Message {
 		Params:   msg.Params,
 		Trailing: text,
 	}
+}
+
+func readLines(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
 }
