@@ -14,7 +14,7 @@ import (
 
 var stripCycki *regexp.Regexp
 
-func cycki(output chan irc.Message, msg irc.Message) {
+func cycki(output func(irc.Message), msg irc.Message) {
 	var rmsg string
 
 	if strings.Split(msg.Trailing, " ")[0] != ":cycki" {
@@ -28,7 +28,7 @@ func cycki(output chan irc.Message, msg irc.Message) {
 		rmsg = "cycki (nsfw): " + string(stripCycki.ReplaceAll([]byte(img), []byte("")))
 	}
 
-	output <- reply(msg, rmsg)
+	output(reply(msg, rmsg))
 }
 
 func init() {

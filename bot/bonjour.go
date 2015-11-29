@@ -10,11 +10,10 @@ import (
 	"strings"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
-func bonjour(output chan irc.Message, msg irc.Message) {
+func bonjour(output func(irc.Message), msg irc.Message) {
 	var rmsg string
 
 	if strings.Split(msg.Trailing, " ")[0] != ":bonjour" {
@@ -28,19 +27,7 @@ func bonjour(output chan irc.Message, msg irc.Message) {
 		rmsg = "bonjour (nsfw): " + img
 	}
 
-	if msg.Params[0] == cfg.LookupString(msg.Context, "Nick") {
-		output <- irc.Message{
-			Command:  "PRIVMSG",
-			Params:   []string{msg.Prefix.Name},
-			Trailing: rmsg,
-		}
-	} else {
-		output <- irc.Message{
-			Command:  "PRIVMSG",
-			Params:   msg.Params,
-			Trailing: rmsg,
-		}
-	}
+	output(reply(msg, rmsg))
 }
 
 func init() {
