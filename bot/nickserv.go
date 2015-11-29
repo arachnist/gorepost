@@ -13,7 +13,7 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-func nickserv(output chan irc.Message, msg irc.Message) {
+func nickserv(output func(irc.Message), msg irc.Message) {
 	if msg.Prefix.String() != cfg.LookupString(msg.Context, "NickServPrefix") {
 		log.Println("Context:", msg.Context, "Someone is spoofing nickserv!")
 		return
@@ -35,14 +35,10 @@ func nickserv(output chan irc.Message, msg irc.Message) {
 	}
 
 	log.Println("Context:", msg.Context, "Identifying to nickserv!")
-	output <- irc.Message{
-		Command:  "PRIVMSG",
-		Params:   []string{msg.Prefix.Name},
-		Trailing: fmt.Sprintf("IDENTIFY %s", cfg.LookupString(msg.Context, "NickServPassword")),
-	}
+	output(reply(msg, fmt.Sprintf("IDENTIFY %s", cfg.LookupString(msg.Context, "NickServPassword"))))
 }
 
-func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
+func joinsecuredchannels(output func(irc.Message), msg irc.Message) {
 	if msg.Prefix.String() != cfg.LookupString(msg.Context, "NickServPrefix") {
 		log.Println("Context:", msg.Context, "Someone is spoofing nickserv!")
 		return
@@ -70,10 +66,10 @@ func joinsecuredchannels(output chan irc.Message, msg irc.Message) {
 
 	for _, channel := range channels {
 		log.Println(msg.Context["Network"], "joining channel", channel)
-		output <- irc.Message{
+		output(irc.Message{
 			Command: "JOIN",
 			Params:  []string{channel},
-		}
+		})
 	}
 }
 

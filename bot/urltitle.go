@@ -28,7 +28,7 @@ func getURLTitle(l string) string {
 	return string(trimTitle.ReplaceAll([]byte(title), []byte{' '})[:])
 }
 
-func linktitle(output chan irc.Message, msg irc.Message) {
+func linktitle(output func(irc.Message), msg irc.Message) {
 	var r []string
 
 	for _, s := range strings.Split(msg.Trailing, " ") {
@@ -51,7 +51,7 @@ func linktitle(output chan irc.Message, msg irc.Message) {
 	if len(r) > 0 {
 		t := cfg.LookupString(msg.Context, "LinkTitlePrefix") + strings.Join(r, cfg.LookupString(msg.Context, "LinkTitleDelimiter"))
 
-		output <- reply(msg, t)
+		output(reply(msg, t))
 	}
 }
 

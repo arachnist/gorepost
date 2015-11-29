@@ -8,7 +8,7 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-func google(output chan irc.Message, msg irc.Message) {
+func google(output func(irc.Message), msg irc.Message) {
 	if strings.Split(msg.Trailing, " ")[0] != ":g" {
 		return
 	}
@@ -25,7 +25,7 @@ func google(output chan irc.Message, msg irc.Message) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		output <- reply(msg, "problem connecting to google")
+		output(reply(msg, "problem connecting to google"))
 		return
 	}
 
@@ -40,12 +40,12 @@ func google(output chan irc.Message, msg irc.Message) {
 		}
 	}
 	if errJ := json.NewDecoder(resp.Body).Decode(&data); errJ != nil {
-		output <- reply(msg, "problem decoding google response")
+		output(reply(msg, "problem decoding google response"))
 		return
 	}
 	if len(data.ResponseData.Results) > 0 {
 		res := data.ResponseData.Results[0]
-		output <- reply(msg, res.TitleNoFormatting+" "+res.URL)
+		output(reply(msg, res.TitleNoFormatting+" "+res.URL))
 	}
 }
 

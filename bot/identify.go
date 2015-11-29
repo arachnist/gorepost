@@ -31,18 +31,18 @@ func IsIdentified(msg irc.Message) bool {
 	return true
 }
 
-func identify(output chan irc.Message, msg irc.Message) {
+func identify(output func(irc.Message), msg irc.Message) {
 	if strings.Split(msg.Trailing, " ")[0] != ":identify" {
 		return
 	}
 
-	output <- irc.Message{
+	output(irc.Message{
 		Command: "WHOIS",
 		Params:  []string{msg.Prefix.Name},
-	}
+	})
 }
 
-func registerIdentification(output chan irc.Message, msg irc.Message) {
+func registerIdentification(output func(irc.Message), msg irc.Message) {
 	net := msg.Context["Network"]
 
 	if identified == nil {
@@ -56,13 +56,13 @@ func registerIdentification(output chan irc.Message, msg irc.Message) {
 	identified[net][msg.Params[1]] = msg.Params[2]
 }
 
-func listIdentified(output chan irc.Message, msg irc.Message) {
+func listIdentified(output func(irc.Message), msg irc.Message) {
 	if strings.Split(msg.Trailing, " ")[0] != ":idlist" {
 		return
 	}
 
 	if cfg.LookupInt(msg.Context, "AccessLevel") < 10 {
-		output <- reply(msg, "access denied")
+		output(reply(msg, "access denied"))
 		return
 	}
 
@@ -74,7 +74,7 @@ func listIdentified(output chan irc.Message, msg irc.Message) {
 		}
 	}
 
-	output <- reply(msg, strings.Join(r, "; "))
+	output(reply(msg, strings.Join(r, "; ")))
 }
 
 func init() {
