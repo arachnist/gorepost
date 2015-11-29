@@ -33,6 +33,7 @@ func httpGet(l string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	defer resp.Body.Close()
 
 	// 5MiB
 	if resp.ContentLength > 5*1024*1024 || resp.ContentLength < 0 {
