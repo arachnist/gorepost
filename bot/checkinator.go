@@ -25,7 +25,7 @@ type checkinator struct {
 	Users   []user
 }
 
-func at(output chan irc.Message, msg irc.Message) {
+func at(output func(irc.Message), msg irc.Message) {
 	var rmsg string
 	var values checkinator
 	var now []string
@@ -37,13 +37,13 @@ func at(output chan irc.Message, msg irc.Message) {
 
 	data, err := httpGet("https://at.hackerspace.pl/api")
 	if err != nil {
-		output <- reply(msg, fmt.Sprint("error:", err))
+		output(reply(msg, fmt.Sprint("error:", err)))
 		return
 	}
 
 	err = json.Unmarshal(data, &values)
 	if err != nil {
-		output <- reply(msg, fmt.Sprint("error:", err))
+		output(reply(msg, fmt.Sprint("error:", err)))
 		return
 	}
 
@@ -76,7 +76,7 @@ func at(output chan irc.Message, msg irc.Message) {
 		rmsg += fmt.Sprintf("; unknown: %d", values.Unknown)
 	}
 
-	output <- reply(msg, rmsg)
+	output(reply(msg, rmsg))
 }
 
 func init() {

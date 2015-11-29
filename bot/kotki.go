@@ -19,7 +19,7 @@ func redirectError(*http.Request, []*http.Request) error {
 	return errNotReally
 }
 
-func kotki(output chan irc.Message, msg irc.Message) {
+func kotki(output func(irc.Message), msg irc.Message) {
 	if strings.Split(msg.Trailing, " ")[0] != ":kotki" {
 		return
 	}
@@ -38,7 +38,7 @@ func kotki(output chan irc.Message, msg irc.Message) {
 	rurl, _ := resp.Location()
 	rmsg = rurl.String()
 
-	output <- reply(msg, rmsg)
+	output(reply(msg, rmsg))
 }
 
 func init() {

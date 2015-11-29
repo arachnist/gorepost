@@ -69,6 +69,7 @@ var eventTests = []struct {
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":ping",
+			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{
 				Name: "idontexist",
 			},
@@ -76,7 +77,7 @@ var eventTests = []struct {
 		expectedOut: []irc.Message{
 			{
 				Command:  "PRIVMSG",
-				Params:   []string{"idontexist"},
+				Params:   []string{"#testchan-1"},
 				Trailing: "pingity pong",
 			},
 		},
@@ -110,21 +111,14 @@ var eventTests = []struct {
 }
 
 func TestPlugins(t *testing.T) {
-	output := make(chan irc.Message, 1)
-	quitCollector := make(chan struct{}, 1)
 	var r []irc.Message
 	var wg sync.WaitGroup
 
-	go func(quit chan struct{}, input chan irc.Message) {
-		for {
-			select {
-			case msg := <-input:
-				wg.Done()
-				r = append(r, msg)
-			case <-quit:
-			}
-		}
-	}(quitCollector, output)
+	// fake irc.Conn Sender replacement
+	output := func(msg irc.Message) {
+		wg.Done()
+		r = append(r, msg)
+	}
 
 	for _, e := range eventTests {
 		r = r[:0]
@@ -143,8 +137,6 @@ func TestPlugins(t *testing.T) {
 			t.Fail()
 		}
 	}
-
-	quitCollector <- struct{}{}
 }
 
 func configLookupHelper(map[string]string) []string {

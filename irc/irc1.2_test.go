@@ -135,7 +135,7 @@ func TestSetup(t *testing.T) {
 	}
 }
 
-func fakeDispatcher(output chan Message, input Message) {
+func fakeDispatcher(output func(Message), input Message) {
 	// nullify Context as it isn't transmitted over the wire
 	input.Context = make(map[string]string)
 	actualInput = append(actualInput, input)

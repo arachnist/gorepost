@@ -27,7 +27,7 @@ type seenRecord struct {
 	Text    string
 }
 
-func seenrecord(output chan irc.Message, msg irc.Message) {
+func seenrecord(output func(irc.Message), msg irc.Message) {
 	if msg.Params == nil {
 		return
 	}
@@ -52,7 +52,7 @@ func seenrecord(output chan irc.Message, msg irc.Message) {
 	}
 }
 
-func seen(output chan irc.Message, msg irc.Message) {
+func seen(output func(irc.Message), msg irc.Message) {
 	var v seenRecord
 	var r string
 
@@ -67,16 +67,16 @@ func seen(output chan irc.Message, msg irc.Message) {
 
 	b, err := k.GetBytes("seen/" + args[1])
 	if err == kt.ErrNotFound {
-		output <- reply(msg, cfg.LookupString(msg.Context, "NotSeenMessage"))
+		output(reply(msg, cfg.LookupString(msg.Context, "NotSeenMessage")))
 		return
 	} else if err != nil {
-		output <- reply(msg, fmt.Sprint("error getting record for", args[1], err))
+		output(reply(msg, fmt.Sprint("error getting record for", args[1], err)))
 		return
 	}
 
 	err = json.Unmarshal(b, &v)
 	if err != nil {
-		output <- reply(msg, fmt.Sprint("error unmarshaling record for", args[1], err))
+		output(reply(msg, fmt.Sprint("error unmarshaling record for", args[1], err)))
 		return
 	}
 
@@ -93,7 +93,7 @@ func seen(output chan irc.Message, msg irc.Message) {
 		r += fmt.Sprint("saying: ", v.Text)
 	}
 
-	output <- reply(msg, r)
+	output(reply(msg, r))
 }
 
 func init() {

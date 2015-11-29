@@ -13,13 +13,13 @@ import (
 
 // channeljoin joins configured IRC channels when IRC server confirms we're good
 // to go.
-func channeljoin(output chan irc.Message, msg irc.Message) {
+func channeljoin(output func(irc.Message), msg irc.Message) {
 	for _, channel := range cfg.LookupStringSlice(msg.Context, "Channels") {
 		log.Println(msg.Context["Network"], "joining channel", channel)
-		output <- irc.Message{
+		output(irc.Message{
 			Command: "JOIN",
 			Params:  []string{channel},
-		}
+		})
 	}
 }
 
