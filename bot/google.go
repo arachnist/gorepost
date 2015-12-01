@@ -3,6 +3,7 @@ package bot
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/arachnist/gorepost/irc"
@@ -45,7 +46,11 @@ func google(output func(irc.Message), msg irc.Message) {
 	}
 	if len(data.ResponseData.Results) > 0 {
 		res := data.ResponseData.Results[0]
-		output(reply(msg, res.TitleNoFormatting+" "+res.URL))
+		link, err := url.QueryUnescape(res.URL)
+		if err != nil {
+			output(reply(msg, "problem decoding url"))
+		}
+		output(reply(msg, res.TitleNoFormatting+" "+link))
 	}
 }
 
