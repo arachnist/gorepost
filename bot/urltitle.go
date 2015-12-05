@@ -6,9 +6,12 @@ package bot
 
 import (
 	"fmt"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 	"log"
 	"regexp"
 	"strings"
+	"unicode/utf8"
 
 	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
@@ -16,6 +19,7 @@ import (
 
 var trimTitle *regexp.Regexp
 var trimLink *regexp.Regexp
+var enc = charmap.ISO8859_2
 
 func getURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
@@ -25,7 +29,15 @@ func getURLTitle(l string) string {
 		return fmt.Sprint("error:", err)
 	}
 
-	return string(trimTitle.ReplaceAll([]byte(title), []byte{' '})[:])
+	title = string(trimTitle.ReplaceAll([]byte(title), []byte{' '})[:])
+	if !utf8.ValidString(title) {
+		title, _, err = transform.String(enc.NewDecoder(), title)
+		if err != nil {
+			return fmt.Sprint("error:", err)
+		}
+	}
+
+	return title
 }
 
 func linktitle(output func(irc.Message), msg irc.Message) {
