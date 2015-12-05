@@ -21,7 +21,7 @@ import (
 
 var errElementNotFound = errors.New("element not found in document")
 
-func httpGet(l string) ([]byte, error) {
+func httpGet(link string) ([]byte, error) {
 	var buf []byte
 	tr := &http.Transport{
 		TLSHandshakeTimeout:   5 * time.Second,
@@ -29,7 +29,7 @@ func httpGet(l string) ([]byte, error) {
 	}
 	client := &http.Client{Transport: tr}
 
-	resp, err := client.Get(l)
+	resp, err := client.Get(link)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -54,8 +54,8 @@ func httpGet(l string) ([]byte, error) {
 	return buf, nil
 }
 
-func httpGetXpath(l, x string) (string, error) {
-	buf, err := httpGet(l)
+func httpGetXpath(link, xpathStr string) (string, error) {
+	buf, err := httpGet(link)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,8 @@ func httpGetXpath(l, x string) (string, error) {
 		return "", errElementNotFound
 	}
 
-	xpath := xpath.Compile(x)
+	xpath := xpath.Compile(xpathStr)
+	defer xpath.Free()
 	sr, err := doc.Root().Search(xpath)
 	if err != nil {
 		return "", err
