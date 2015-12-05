@@ -24,8 +24,8 @@ var errElementNotFound = errors.New("element not found in document")
 func httpGet(link string) ([]byte, error) {
 	var buf []byte
 	tr := &http.Transport{
-		TLSHandshakeTimeout:   5 * time.Second,
-		ResponseHeaderTimeout: 5 * time.Second,
+		TLSHandshakeTimeout:   20 * time.Second,
+		ResponseHeaderTimeout: 20 * time.Second,
 	}
 	client := &http.Client{Transport: tr}
 
