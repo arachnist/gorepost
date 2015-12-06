@@ -5,5 +5,7 @@
     ],
     "NickServPrefix":"NickServ!NickServ@services.",
     "NickServPassword":"test_password",
+    "LinkTitlePrefix":"↳ title: ",
+    "LinkTitleDelimiter":" | ",
     "Nick":"gorepost"
 }

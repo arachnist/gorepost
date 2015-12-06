@@ -117,6 +117,77 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{ // "google",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":g google.com",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Google https://www.google.com/",
+			},
+		},
+	},
+	{ // "linktitle",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.google.com/",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Google",
+			},
+		},
+	},
+	{ // "linktitle notitle",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.google.com/ notitle",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{ // "nickserv spoof"
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "This nickname is registered. Please choose a different nickname, or identify via …",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "fake.",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{ // "nickserv other message"
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "Some other random message…",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
 	{ // non-matching
 		in: irc.Message{
 			Command:  "PRIVMSG",
