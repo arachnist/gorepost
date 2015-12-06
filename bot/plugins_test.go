@@ -101,6 +101,23 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{ // "pick",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":pick test",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "test",
+			},
+		},
+	},
 	{ // non-matching
 		in: irc.Message{
 			Command:  "PRIVMSG",
