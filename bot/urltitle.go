@@ -44,6 +44,10 @@ func linktitle(output func(irc.Message), msg irc.Message) {
 	var r []string
 
 	for _, s := range strings.Split(msg.Trailing, " ") {
+		if s == "notitle" {
+			return
+		}
+
 		b, err := regexp.Match("https?://", []byte(s))
 		if err != nil {
 			log.Println("Context:", msg.Context, "linktitle regex error:", err)
