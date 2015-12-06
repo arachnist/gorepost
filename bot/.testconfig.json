@@ -7,5 +7,6 @@
     "NickServPassword":"test_password",
     "LinkTitlePrefix":"↳ title: ",
     "LinkTitleDelimiter":" | ",
+    "SecuredChannels":["#securechan-1","#securechan-2"],
     "Nick":"gorepost"
 }

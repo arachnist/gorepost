@@ -152,6 +152,28 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{ // "nickserv channeljoin"
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "You are now identified",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command: "JOIN",
+				Params:  []string{"#securechan-1"},
+			},
+			{
+				Command: "JOIN",
+				Params:  []string{"#securechan-2"},
+			},
+		},
+	},
 	{ // "linktitle notitle",
 		in: irc.Message{
 			Command:  "PRIVMSG",
