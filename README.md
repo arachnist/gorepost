@@ -2,6 +2,7 @@ gorepost
 ========
 [![Build Status](https://api.travis-ci.org/arachnist/gorepost.svg?branch=master)](https://travis-ci.org/arachnist/gorepost)
 [![GoDoc](https://godoc.org/github.com/arachnist/gorepost?status.svg)](https://godoc.org/github.com/arachnist/gorepost)
+[![Coverage Status](https://coveralls.io/repos/arachnist/gorepost/badge.svg?branch=master&service=github)](https://coveralls.io/github/arachnist/gorepost?branch=master)
 
 Gorepost implements an overengineered IRC bot.
 
