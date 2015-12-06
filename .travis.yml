@@ -11,6 +11,8 @@ before_install:
     - go get github.com/arachnist/gorepost/config
     - go get github.com/axw/gocov/gocov
     - go get github.com/mattn/goveralls
+    - go get github.com/go-playground/overalls
     - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 script:
-   - $HOME/gopath/bin/goveralls -service=travis-ci
+    - $HOME/gopath/bin/overalls -project=github.com/arachnist/gorepost -covermode=count
+    - $HOME/gopath/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci
