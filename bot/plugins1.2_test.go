@@ -173,6 +173,68 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{ // "linktitle connection refused",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://127.0.0.1:333/conn-refused",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: error:Get http://127.0.0.1:333/conn-refused: dial tcp 127.0.0.1:333: getsockopt: connection refused",
+			},
+		},
+	},
+	{ // "linktitle iso8859-2",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test-iso8859-2.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Tytuł używający przestarzałego kodowania znaków",
+			},
+		},
+	},
+	{ // "linktitle common exploit",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Tak Aż zbyt dobrze. Naprawdę QUIT dupa",
+			},
+		},
+	},
+	{ // "linktitle missing title",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test-no-title.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
 	{ // "linktitle notitle",
 		in: irc.Message{
 			Command:  "PRIVMSG",
