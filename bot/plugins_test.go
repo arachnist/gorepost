@@ -242,7 +242,7 @@ var eventTests = []struct {
 		desc: "seen noone",
 		in: irc.Message{
 			Command:  "PRIVMSG",
-			Trailing: "http://arachnist.is-a.cat/test.html",
+			Trailing: ":seen noone",
 			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{
 				Name: "idontexist",
