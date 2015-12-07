@@ -20,10 +20,12 @@ import (
 )
 
 var eventTests = []struct {
+	desc        string
 	in          irc.Message
 	expectedOut []irc.Message
 }{
-	{ // "ping"
+	{
+		desc: "ping",
 		in: irc.Message{
 			Command:  "PING",
 			Trailing: "foobar",
@@ -35,7 +37,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "invitki"
+	{
+		desc: "invitki",
 		in: irc.Message{
 			Command:  "INVITE",
 			Trailing: "#test-channel",
@@ -47,7 +50,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "channel join"
+	{
+		desc: "channel join",
 		in: irc.Message{
 			Command: "001",
 			Context: map[string]string{
@@ -65,7 +69,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "msgping",
+	{
+		desc: "msgping",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":ping",
@@ -82,7 +87,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "nickserv"
+	{
+		desc: "nickserv",
 		in: irc.Message{
 			Command:  "NOTICE",
 			Params:   []string{"gorepost"},
@@ -101,7 +107,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "pick",
+	{
+		desc: "pick",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":pick test",
@@ -118,7 +125,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "google",
+	{
+		desc: "google",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":g google.com",
@@ -135,7 +143,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "linktitle",
+	{
+		desc: "linktitle",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "https://www.google.com/",
@@ -152,7 +161,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "nickserv channeljoin"
+	{
+		desc: "nickserv channeljoin",
 		in: irc.Message{
 			Command:  "NOTICE",
 			Params:   []string{"gorepost"},
@@ -174,7 +184,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "linktitle connection refused",
+	{
+		desc: "linktitle connection refused",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "http://127.0.0.1:333/conn-refused",
@@ -191,7 +202,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "linktitle iso8859-2",
+	{
+		desc: "linktitle iso8859-2",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "http://arachnist.is-a.cat/test-iso8859-2.html",
@@ -208,7 +220,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "linktitle common exploit",
+	{
+		desc: "linktitle common exploit",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "http://arachnist.is-a.cat/test.html",
@@ -225,7 +238,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "linktitle missing title",
+	{
+		desc: "linktitle missing title",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "http://arachnist.is-a.cat/test-no-title.html",
@@ -236,7 +250,8 @@ var eventTests = []struct {
 		},
 		expectedOut: []irc.Message{},
 	},
-	{ // "linktitle notitle",
+	{
+		desc: "linktitle notitle",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "https://www.google.com/ notitle",
@@ -247,7 +262,8 @@ var eventTests = []struct {
 		},
 		expectedOut: []irc.Message{},
 	},
-	{ // "nickserv spoof"
+	{
+		desc: "nickserv spoof",
 		in: irc.Message{
 			Command:  "NOTICE",
 			Params:   []string{"gorepost"},
@@ -260,7 +276,8 @@ var eventTests = []struct {
 		},
 		expectedOut: []irc.Message{},
 	},
-	{ // "nickserv other message"
+	{
+		desc: "nickserv other message",
 		in: irc.Message{
 			Command:  "NOTICE",
 			Params:   []string{"gorepost"},
@@ -273,7 +290,8 @@ var eventTests = []struct {
 		},
 		expectedOut: []irc.Message{},
 	},
-	{ // non-matching
+	{
+		desc: "non-matching",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "foo bar baz",
@@ -293,6 +311,7 @@ func TestPlugins(t *testing.T) {
 	}
 
 	for _, e := range eventTests {
+		t.Log("running test", e.desc)
 		r = r[:0]
 
 		wg.Add(len(e.expectedOut))
