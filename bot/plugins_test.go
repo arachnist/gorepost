@@ -42,7 +42,7 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{
+	/* {
 		desc: "seen myself",
 		in: irc.Message{
 			Command:  "PRIVMSG",
@@ -59,7 +59,7 @@ var eventTests = []struct {
 				Trailing: fmt.Sprintf("Last seen idontexist on /#testchan-1 at %v saying: :seen idontexist", time.Now().Round(time.Second)),
 			},
 		},
-	},
+	}, */
 	{
 		desc: "ping",
 		in: irc.Message{
