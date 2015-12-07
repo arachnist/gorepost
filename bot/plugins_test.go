@@ -25,6 +25,42 @@ var eventTests = []struct {
 	expectedOut []irc.Message
 }{
 	{
+		desc: "seen noone",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen noone",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "nope, never",
+			},
+		},
+	},
+	{
+		desc: "seen myself",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen idontexist",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: fmt.Sprintf("Last seen idontexist on /#testchan-1 at %v saying: :seen idontexist", time.Now().Round(time.Second)),
+			},
+		},
+	},
+	{
 		desc: "ping",
 		in: irc.Message{
 			Command:  "PING",
@@ -235,24 +271,6 @@ var eventTests = []struct {
 				Command:  "PRIVMSG",
 				Params:   []string{"#testchan-1"},
 				Trailing: "↳ title: Tak Aż zbyt dobrze. Naprawdę QUIT dupa",
-			},
-		},
-	},
-	{
-		desc: "seen noone",
-		in: irc.Message{
-			Command:  "PRIVMSG",
-			Trailing: ":seen noone",
-			Params:   []string{"#testchan-1"},
-			Prefix: &irc.Prefix{
-				Name: "idontexist",
-			},
-		},
-		expectedOut: []irc.Message{
-			{
-				Command:  "PRIVMSG",
-				Params:   []string{"#testchan-1"},
-				Trailing: "nope, never",
 			},
 		},
 	},
