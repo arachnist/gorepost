@@ -20,10 +20,12 @@ import (
 )
 
 var eventTests = []struct {
+	desc        string
 	in          irc.Message
 	expectedOut []irc.Message
 }{
-	{ // "ping"
+	{
+		desc: "ping",
 		in: irc.Message{
 			Command:  "PING",
 			Trailing: "foobar",
@@ -35,7 +37,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "invitki"
+	{
+		desc: "invitki",
 		in: irc.Message{
 			Command:  "INVITE",
 			Trailing: "#test-channel",
@@ -47,7 +50,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "channel join"
+	{
+		desc: "channel join",
 		in: irc.Message{
 			Command: "001",
 			Context: map[string]string{
@@ -65,7 +69,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "msgping",
+	{
+		desc: "msgping",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: ":ping",
@@ -82,7 +87,8 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // "nickserv"
+	{
+		desc: "nickserv",
 		in: irc.Message{
 			Command:  "NOTICE",
 			Params:   []string{"gorepost"},
@@ -101,7 +107,191 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{ // non-matching
+	{
+		desc: "pick",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":pick test",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "test",
+			},
+		},
+	},
+	{
+		desc: "google",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":g google.com",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Google https://www.google.com/",
+			},
+		},
+	},
+	{
+		desc: "linktitle",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.google.com/",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Google",
+			},
+		},
+	},
+	{
+		desc: "nickserv channeljoin",
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "You are now identified",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command: "JOIN",
+				Params:  []string{"#securechan-1"},
+			},
+			{
+				Command: "JOIN",
+				Params:  []string{"#securechan-2"},
+			},
+		},
+	},
+	{
+		desc: "linktitle connection refused",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://127.0.0.1:333/conn-refused",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: error:Get http://127.0.0.1:333/conn-refused: dial tcp 127.0.0.1:333: getsockopt: connection refused",
+			},
+		},
+	},
+	{
+		desc: "linktitle iso8859-2",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test-iso8859-2.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Tytuł używający przestarzałego kodowania znaków",
+			},
+		},
+	},
+	{
+		desc: "linktitle common exploit",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "↳ title: Tak Aż zbyt dobrze. Naprawdę QUIT dupa",
+			},
+		},
+	},
+	{
+		desc: "linktitle missing title",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test-no-title.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{
+		desc: "linktitle notitle",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.google.com/ notitle",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{
+		desc: "nickserv spoof",
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "This nickname is registered. Please choose a different nickname, or identify via …",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "fake.",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{
+		desc: "nickserv other message",
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "Some other random message…",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+		expectedOut: []irc.Message{},
+	},
+	{
+		desc: "non-matching",
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "foo bar baz",
@@ -121,6 +311,7 @@ func TestPlugins(t *testing.T) {
 	}
 
 	for _, e := range eventTests {
+		t.Log("running test", e.desc)
 		r = r[:0]
 
 		wg.Add(len(e.expectedOut))
