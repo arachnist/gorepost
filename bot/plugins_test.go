@@ -239,6 +239,24 @@ var eventTests = []struct {
 		},
 	},
 	{
+		desc: "seen noone",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "nope, never",
+			},
+		},
+	},
+	{
 		desc: "linktitle missing title",
 		in: irc.Message{
 			Command:  "PRIVMSG",
