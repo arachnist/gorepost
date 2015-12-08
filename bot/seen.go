@@ -30,7 +30,7 @@ type seenRecord struct {
 func seenrecord(output func(irc.Message), msg irc.Message) {
 	var target string
 
-	if msg.Params == nil {
+	if msg.Params == nil || msg.Command == "QUIT" {
 		target = ""
 	} else {
 		target = msg.Params[0]
