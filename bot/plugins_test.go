@@ -238,66 +238,6 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{
-		desc: "linktitle missing title",
-		in: irc.Message{
-			Command:  "PRIVMSG",
-			Trailing: "http://arachnist.is-a.cat/test-no-title.html",
-			Params:   []string{"#testchan-1"},
-			Prefix: &irc.Prefix{
-				Name: "idontexist",
-			},
-		},
-		expectedOut: []irc.Message{},
-	},
-	{
-		desc: "linktitle notitle",
-		in: irc.Message{
-			Command:  "PRIVMSG",
-			Trailing: "https://www.google.com/ notitle",
-			Params:   []string{"#testchan-1"},
-			Prefix: &irc.Prefix{
-				Name: "idontexist",
-			},
-		},
-		expectedOut: []irc.Message{},
-	},
-	{
-		desc: "nickserv spoof",
-		in: irc.Message{
-			Command:  "NOTICE",
-			Params:   []string{"gorepost"},
-			Trailing: "This nickname is registered. Please choose a different nickname, or identify via …",
-			Prefix: &irc.Prefix{
-				Name: "NickServ",
-				User: "NickServ",
-				Host: "fake.",
-			},
-		},
-		expectedOut: []irc.Message{},
-	},
-	{
-		desc: "nickserv other message",
-		in: irc.Message{
-			Command:  "NOTICE",
-			Params:   []string{"gorepost"},
-			Trailing: "Some other random message…",
-			Prefix: &irc.Prefix{
-				Name: "NickServ",
-				User: "NickServ",
-				Host: "services.",
-			},
-		},
-		expectedOut: []irc.Message{},
-	},
-	{
-		desc: "non-matching",
-		in: irc.Message{
-			Command:  "PRIVMSG",
-			Trailing: "foo bar baz",
-		},
-		expectedOut: []irc.Message{},
-	},
 }
 
 func TestPlugins(t *testing.T) {
@@ -327,6 +267,80 @@ func TestPlugins(t *testing.T) {
 			t.Logf("result: %+v\n", r)
 			t.Fail()
 		}
+	}
+}
+
+var noResponseEvents = []struct {
+	desc string
+	in   irc.Message
+}{
+	{
+		desc: "linktitle missing title",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://arachnist.is-a.cat/test-no-title.html",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+	},
+	{
+		desc: "linktitle notitle",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.google.com/ notitle",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+	},
+	{
+		desc: "nickserv spoof",
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "This nickname is registered. Please choose a different nickname, or identify via …",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "fake.",
+			},
+		},
+	},
+	{
+		desc: "nickserv other message",
+		in: irc.Message{
+			Command:  "NOTICE",
+			Params:   []string{"gorepost"},
+			Trailing: "Some other random message…",
+			Prefix: &irc.Prefix{
+				Name: "NickServ",
+				User: "NickServ",
+				Host: "services.",
+			},
+		},
+	},
+	{
+		desc: "non-matching",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "foo bar baz",
+		},
+	},
+}
+
+func TestNoResponse(t *testing.T) {
+	output := func(msg irc.Message) {
+		t.Fail()
+	}
+
+	for _, e := range noResponseEvents {
+		t.Log("Running test", e.desc)
+		Dispatcher(output, e.in)
+
+		time.Sleep(100000000 * time.Nanosecond) // 1*10^8 => 0.1 seconds
 	}
 }
 
