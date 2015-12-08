@@ -519,7 +519,7 @@ func TestSeenConditions(t *testing.T) {
 
 	wg.Add(len(seenTestSeedEvents))
 	for _, e := range seenTestSeedEvents {
-		t.Logf("Seeding seen db with: %+v\n", e)
+		t.Logf("Filling seen db with: %+v\n", e)
 		Dispatcher(failOutput, e)
 		wg.Done()
 	}
