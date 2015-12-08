@@ -95,6 +95,8 @@ func seen(output func(irc.Message), msg irc.Message) {
 		r += fmt.Sprint("quitting with reasson: ", v.Text)
 	case "PRIVMSG":
 		r += fmt.Sprint("saying: ", v.Text)
+	case "NOTICE":
+		r += fmt.Sprint("noticing: ", v.Text)
 	}
 
 	output(reply(msg, r))
