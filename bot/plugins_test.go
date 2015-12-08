@@ -357,10 +357,22 @@ var noResponseEvents = []struct {
 			},
 		},
 	},
+	{
+		desc: "seen without arguments",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+	},
 }
 
 func TestNoResponse(t *testing.T) {
 	output := func(msg irc.Message) {
+		t.Logf("Got a response: %+v\n", msg)
 		t.Fail()
 	}
 
