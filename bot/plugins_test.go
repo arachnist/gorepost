@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"regexp"
 	"sync"
 	"testing"
 	"time"
@@ -42,24 +43,6 @@ var eventTests = []struct {
 			},
 		},
 	},
-	/* {
-		desc: "seen myself",
-		in: irc.Message{
-			Command:  "PRIVMSG",
-			Trailing: ":seen idontexist",
-			Params:   []string{"#testchan-1"},
-			Prefix: &irc.Prefix{
-				Name: "idontexist",
-			},
-		},
-		expectedOut: []irc.Message{
-			{
-				Command:  "PRIVMSG",
-				Params:   []string{"#testchan-1"},
-				Trailing: fmt.Sprintf("Last seen idontexist on /#testchan-1 at %v saying: :seen idontexist", time.Now().Round(time.Second)),
-			},
-		},
-	}, */
 	{
 		desc: "ping",
 		in: irc.Message{
@@ -287,7 +270,7 @@ func TestPlugins(t *testing.T) {
 	}
 
 	for _, e := range eventTests {
-		t.Log("running test", e.desc)
+		t.Log("Running test", e.desc)
 		r = r[:0]
 
 		wg.Add(len(e.expectedOut))
@@ -318,6 +301,8 @@ var noResponseEvents = []struct {
 			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{
 				Name: "idontexist",
+				User: "test",
+				Host: "framework",
 			},
 		},
 	},
@@ -329,6 +314,8 @@ var noResponseEvents = []struct {
 			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{
 				Name: "idontexist",
+				User: "test",
+				Host: "framework",
 			},
 		},
 	},
@@ -363,6 +350,11 @@ var noResponseEvents = []struct {
 		in: irc.Message{
 			Command:  "PRIVMSG",
 			Trailing: "foo bar baz",
+			Prefix: &irc.Prefix{
+				Name: "test-framework",
+				User: "test",
+				Host: "framework",
+			},
 		},
 	},
 }
@@ -378,6 +370,155 @@ func TestNoResponse(t *testing.T) {
 
 		time.Sleep(100000000 * time.Nanosecond) // 1*10^8 => 0.1 seconds
 	}
+}
+
+var seenTestSeedEvents = []irc.Message{
+	{
+		Command:  "JOIN",
+		Trailing: "",
+		Params:   []string{"#testchan-1"},
+		Prefix: &irc.Prefix{
+			Name: "join",
+			User: "seen",
+			Host: "test",
+		},
+	},
+	{
+		Command:  "PRIVMSG",
+		Trailing: "that's a text",
+		Params:   []string{"#testchan-1"},
+		Prefix: &irc.Prefix{
+			Name: "privmsg",
+			User: "seen",
+			Host: "test",
+		},
+	},
+	{
+		Command:  "NOTICE",
+		Trailing: "that's a notice",
+		Params:   []string{"#testchan-1"},
+		Prefix: &irc.Prefix{
+			Name: "notice",
+			User: "seen",
+			Host: "test",
+		},
+	},
+	{
+		Command:  "PART",
+		Trailing: "i'm leaving you",
+		Params:   []string{"#testchan-1"},
+		Prefix: &irc.Prefix{
+			Name: "part",
+			User: "seen",
+			Host: "test",
+		},
+	},
+	{
+		Command:  "QUIT",
+		Trailing: "that's a quit message",
+		Params:   []string{},
+		Prefix: &irc.Prefix{
+			Name: "quit",
+			User: "seen",
+			Host: "test",
+		},
+	},
+}
+
+var seenTests = []struct {
+	in       irc.Message
+	outRegex string
+}{
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen join",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: "^Last seen join on /#testchan-1 at .* joining$",
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen privmsg",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: "^Last seen privmsg on /#testchan-1 at .* saying: that's a text$",
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen notice",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: "^Last seen notice on /#testchan-1 at .* noticing: that's a notice$",
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen part",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: "^Last seen part on /#testchan-1 at .* leaving: i'm leaving you$",
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":seen quit",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: "^Last seen quit on / at .* quitting with reasson: that's a quit message$",
+	},
+}
+
+func TestSeenConditions(t *testing.T) {
+	var wg sync.WaitGroup
+
+	failOutput := func(msg irc.Message) {
+		t.Log("these should not output anything")
+		t.Fail()
+	}
+
+	genOutTestFunction := func(regex string) func(irc.Message) {
+		return func(m irc.Message) {
+			t.Logf("testing regex %+v on %+v", regex, m.Trailing)
+			if b, _ := regexp.Match(regex, []byte(m.Trailing)); !b {
+				t.Log("Failed", m.Trailing)
+				t.Fail()
+			}
+			wg.Done()
+		}
+	}
+
+	wg.Add(len(seenTestSeedEvents))
+	for _, e := range seenTestSeedEvents {
+		t.Logf("Seeding seen db with: %+v\n", e)
+		Dispatcher(failOutput, e)
+		wg.Done()
+	}
+	wg.Wait()
+
+	wg.Add(len(seenTests))
+	for _, e := range seenTests {
+		Dispatcher(genOutTestFunction(e.outRegex), e.in)
+	}
+
+	wg.Wait()
 }
 
 func configLookupHelper(map[string]string) []string {
