@@ -28,13 +28,17 @@ type seenRecord struct {
 }
 
 func seenrecord(output func(irc.Message), msg irc.Message) {
+	var target string
+
 	if msg.Params == nil {
-		return
+		target = ""
+	} else {
+		target = msg.Params[0]
 	}
 
 	v := seenRecord{
 		Network: msg.Context["Network"],
-		Target:  msg.Params[0],
+		Target:  target,
 		Action:  msg.Command,
 		Time:    time.Now(),
 		Text:    msg.Trailing,
