@@ -8,5 +8,6 @@
     "LinkTitlePrefix":"↳ title: ",
     "LinkTitleDelimiter":" | ",
     "SecuredChannels":["#securechan-1","#securechan-2"],
+    "NotSeenMessage":"nope, never",
     "Nick":"gorepost"
 }
