@@ -8,13 +8,16 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
+	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
 var objects []string
 var predicates []string
+var janLock sync.Mutex
 
 func jan(output func(irc.Message), msg irc.Message) {
 	args := strings.Split(msg.Trailing, " ")
@@ -42,18 +45,25 @@ func jan(output func(irc.Message), msg irc.Message) {
 	output(reply(msg, str))
 }
 
-func init() {
+func lazyJanInit() {
+	defer janLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
-	objects, err = readLines("/home/repost/rzeczowniki")
+	objects, err = readLines(cfg.LookupString(nil, "DictionaryObjects"))
 	if err != nil {
 		log.Println("failed to read objects", err)
 		return
 	}
-	predicates, err = readLines("/home/repost/czasowniki")
+	predicates, err = readLines(cfg.LookupString(nil, "DictionaryVerbs"))
 	if err != nil {
 		log.Println("failed to read predicates", err)
 		return
 	}
 	addCallback("PRIVMSG", "jan", jan)
+}
+
+func init() {
+	janLock.Lock()
+	log.Println("Defering \"jan\" initialization")
+	go lazyJanInit()
 }
