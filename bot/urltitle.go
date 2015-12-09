@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
-	"log"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -48,11 +47,7 @@ func linktitle(output func(irc.Message), msg irc.Message) {
 			return
 		}
 
-		b, err := regexp.Match("https?://", []byte(s))
-		if err != nil {
-			log.Println("Context:", msg.Context, "linktitle regex error:", err)
-			return
-		}
+		b, _ := regexp.Match("https?://", []byte(s))
 
 		s = string(trimLink.ReplaceAll([]byte(s), []byte("http"))[:])
 

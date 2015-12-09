@@ -24,11 +24,7 @@ func nickserv(output func(irc.Message), msg irc.Message) {
 		regexStr = "^This nickname is registered"
 	}
 
-	b, err := regexp.Match(regexStr, []byte(msg.Trailing))
-	if err != nil {
-		log.Println("Context:", msg.Context, "NickServ regex error:", err)
-		return
-	}
+	b, _ := regexp.Match(regexStr, []byte(msg.Trailing))
 
 	if !b {
 		return
@@ -49,11 +45,7 @@ func joinsecuredchannels(output func(irc.Message), msg irc.Message) {
 		regexStr = "^You are now identified"
 	}
 
-	b, err := regexp.Match(regexStr, []byte(msg.Trailing))
-	if err != nil {
-		log.Println("Context:", msg.Context, "NickServ regex error:", err)
-		return
-	}
+	b, _ := regexp.Match(regexStr, []byte(msg.Trailing))
 
 	if !b {
 		return
