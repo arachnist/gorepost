@@ -21,6 +21,6 @@ before_install:
 before_script:
     - ktserver -dmn -host 127.0.0.1 -port 1337
 script:
-    - go test -v ./...
+    - go test -race -v ./...
     - $HOME/gopath/bin/overalls -project=github.com/arachnist/gorepost -covermode=count -debug
     - $HOME/gopath/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci
