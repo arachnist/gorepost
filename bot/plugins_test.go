@@ -261,10 +261,13 @@ var eventTests = []struct {
 
 func TestPlugins(t *testing.T) {
 	var r []irc.Message
+	var m sync.Mutex
 	var wg sync.WaitGroup
 
 	// fake irc.Conn Sender replacement
 	output := func(msg irc.Message) {
+		m.Lock()
+		defer m.Unlock()
 		wg.Done()
 		r = append(r, msg)
 	}
@@ -281,11 +284,13 @@ func TestPlugins(t *testing.T) {
 
 		wg.Wait()
 
+		m.Lock()
 		if fmt.Sprintf("%+v", r) != fmt.Sprintf("%+v", e.expectedOut) {
 			t.Logf("expected: %+v\n", e.expectedOut)
 			t.Logf("result: %+v\n", r)
 			t.Fail()
 		}
+		m.Unlock()
 	}
 }
 
