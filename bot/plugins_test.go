@@ -257,6 +257,86 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{
+		desc: "papież",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":papież",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+				User: "test",
+				Host: "framework",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Papież adjective",
+			},
+		},
+	},
+	{
+		desc: "jan without args",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":jan",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+				User: "test",
+				Host: "framework",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Jan Paweł II predicate małe object",
+			},
+		},
+	},
+	{
+		desc: "jan predicate",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":jan predicate-ł",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+				User: "test",
+				Host: "framework",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Jan Paweł II predicate-ł małe object",
+			},
+		},
+	},
+	{
+		desc: "jan object",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":jan specified-object",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+				User: "test",
+				Host: "framework",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Jan Paweł II predicate małe specified-object",
+			},
+		},
+	},
 }
 
 func TestPlugins(t *testing.T) {

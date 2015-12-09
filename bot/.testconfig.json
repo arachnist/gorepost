@@ -9,5 +9,8 @@
     "LinkTitleDelimiter":" | ",
     "SecuredChannels":["#securechan-1","#securechan-2"],
     "NotSeenMessage":"nope, never",
+    "DictionaryObjects":".dicts/objects",
+    "DictionaryVerbs":".dicts/verbs",
+    "DictionaryAdjectives":".dicts/adjectives",
     "Nick":"gorepost"
 }
