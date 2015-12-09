@@ -44,7 +44,7 @@ func Dispatcher(output func(irc.Message), input irc.Message) {
 			for i, f := range callbacks[input.Command] {
 				if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
 					log.Println("Context:", input.Context, "Plugin disabled", i)
-					return
+					continue
 				}
 				if _, ok := cfg.LookupStringMap(input.Context, "WhitelistedPlugins")[i]; ok {
 					go f(output, input)
@@ -56,7 +56,7 @@ func Dispatcher(output func(irc.Message), input irc.Message) {
 			for i, f := range callbacks[input.Command] {
 				if _, ok := cfg.LookupStringMap(input.Context, "DisabledPlugins")[i]; ok {
 					log.Println("Context:", input.Context, "Plugin disabled", i)
-					return
+					continue
 				}
 				go f(output, input)
 			}
