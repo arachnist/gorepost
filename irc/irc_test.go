@@ -42,12 +42,6 @@ var input = []Message{
 var actualOutput []Message
 var actualInput []Message
 
-func connWriter(c net.Conn) {
-}
-
-func connReader(c net.Conn) {
-}
-
 func fakeServer(t *testing.T) {
 	ln, err := net.Listen("tcp", ":36667")
 	if err != nil {
@@ -73,10 +67,10 @@ func fakeServer(t *testing.T) {
 			}
 		}(conn)
 
+		wg.Add(len(expectedOutput))
 		// reader
 		go func(c net.Conn) {
 			reader := bufio.NewReader(c)
-			wg.Add(len(expectedOutput))
 			for range expectedOutput {
 				raw, err := reader.ReadString(delim)
 				if err != nil {
@@ -103,6 +97,8 @@ func fakeServer(t *testing.T) {
 	}
 }
 
+var setupMutex sync.Mutex
+
 func TestSetup(t *testing.T) {
 	go fakeServer(t)
 
@@ -115,9 +111,13 @@ func TestSetup(t *testing.T) {
 
 	// since we tested a reconnect, we should expect actual results to be
 	// multipled
+	setupMutex.Lock()
 	actualExpectedOutput := append(expectedOutput, expectedOutput...)
 	actualExpectedInput := append(input, input...)
+	setupMutex.Unlock()
 
+	setupMutex.Lock()
+	defer setupMutex.Unlock()
 	if fmt.Sprintf("%+v", actualExpectedOutput) != fmt.Sprintf("%+v", actualOutput) {
 		t.Log("Expected output does not match actual output")
 		t.Logf("expected: %+v\n", actualExpectedOutput)
@@ -135,6 +135,8 @@ func TestSetup(t *testing.T) {
 
 func fakeDispatcher(output func(Message), input Message) {
 	// nullify Context as it isn't transmitted over the wire
+	setupMutex.Lock()
+	defer setupMutex.Unlock()
 	input.Context = make(map[string]string)
 	actualInput = append(actualInput, input)
 }
