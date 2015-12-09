@@ -5,6 +5,8 @@ env:
   - "PATH=/home/travis/gopath/bin:$PATH"
 sudo: required
 dist: trusty
+notifications:
+    irc: "chat.freenode.net#gorepost-test"
 before_install:
     - go get github.com/arachnist/gorepost/bot
     - go get github.com/arachnist/gorepost/irc
