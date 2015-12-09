@@ -109,7 +109,11 @@ func (c *Connection) Cleaner() {
 			defer c.l.Unlock()
 			log.Println(c.network, "cleaning up!")
 			c.quitrecv <- struct{}{}
-			c.conn.Close()
+			// there's a slight chance to hit this if quit request is received
+			// before irc connection is established, possibly between reconnects
+			if c.conn != nil {
+				c.conn.Close()
+			}
 			log.Println(c.network, "closing Cleaner")
 			return
 		case <-c.reconnectCleanup:
