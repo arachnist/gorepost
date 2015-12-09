@@ -56,10 +56,10 @@ func fakeServer(t *testing.T) {
 			t.Error("error accepting connection")
 		}
 
+		wg.Add(len(input))
 		// writer
 		go func(c net.Conn) {
 			writer := bufio.NewWriter(c)
-			wg.Add(len(input))
 			for _, msg := range input {
 				writer.WriteString(msg.String() + endline)
 				writer.Flush()
@@ -84,7 +84,9 @@ func fakeServer(t *testing.T) {
 					t.Fail()
 				}
 
+				setupMutex.Lock()
 				actualOutput = append(actualOutput, *msg)
+				setupMutex.Unlock()
 				wg.Done()
 			}
 		}(conn)
