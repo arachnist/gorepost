@@ -17,13 +17,17 @@ import (
 
 var objects []string
 var predicates []string
-var janLock sync.Mutex
+var janLock sync.RWMutex
 
 func jan(output func(irc.Message), msg irc.Message) {
 	args := strings.Split(msg.Trailing, " ")
 	if args[0] != ":jan" {
 		return
 	}
+
+	janLock.RLock()
+	defer janLock.RUnlock()
+
 	var predicate string
 	var object string
 
