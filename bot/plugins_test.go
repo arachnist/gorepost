@@ -520,14 +520,14 @@ func TestSeenConditions(t *testing.T) {
 	wg.Add(len(seenTestSeedEvents))
 	for _, e := range seenTestSeedEvents {
 		t.Logf("Filling seen db with: %+v\n", e)
-		Dispatcher(failOutput, e)
+		seenrecord(failOutput, e)
 		wg.Done()
 	}
 	wg.Wait()
 
 	wg.Add(len(seenTests))
 	for _, e := range seenTests {
-		Dispatcher(genOutTestFunction(e.outRegex), e.in)
+		seen(genOutTestFunction(e.outRegex), e.in)
 	}
 
 	wg.Wait()
