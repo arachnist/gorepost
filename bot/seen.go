@@ -44,13 +44,9 @@ func seenrecord(output func(irc.Message), msg irc.Message) {
 		Text:    msg.Trailing,
 	}
 
-	b, err := json.Marshal(v)
-	if err != nil {
-		log.Println("Context:", msg.Context, "json marshal of seen record failed:", err)
-		return
-	}
+	b, _ := json.Marshal(v)
 
-	err = k.Set("seen/"+msg.Prefix.Name, b)
+	err := k.Set("seen/"+msg.Prefix.Name, b)
 	if err != nil {
 		log.Println("Context:", msg.Context, "error recording seen record:", err)
 	}
@@ -78,11 +74,7 @@ func seen(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	err = json.Unmarshal(b, &v)
-	if err != nil {
-		output(reply(msg, fmt.Sprint("error unmarshaling record for", args[1], err)))
-		return
-	}
+	_ = json.Unmarshal(b, &v)
 
 	r = fmt.Sprintf("Last seen %s on %s/%s at %v ", args[1], v.Network, v.Target, v.Time.Round(time.Second))
 
