@@ -8,12 +8,15 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 
+	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
-var adverbs []string
+var adjectives []string
+var papiezLock sync.RWMutex
 
 func papiez(output func(irc.Message), msg irc.Message) {
 	args := strings.Split(msg.Trailing, " ")
@@ -21,18 +24,28 @@ func papiez(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	choice := "Papież " + adverbs[rand.Intn(len(adverbs))]
+	papiezLock.RLock()
+	defer papiezLock.RUnlock()
+
+	choice := "Papież " + adjectives[rand.Intn(len(adjectives))]
 
 	output(reply(msg, choice))
 }
 
-func init() {
+func lazyPapiezInit() {
+	defer papiezLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
-	adverbs, err = readLines("/home/repost/przymiotniki")
+	adjectives, err = readLines(cfg.LookupString(nil, "DictionaryAdjectives"))
 	if err != nil {
-		log.Println("failed to read adverbs", err)
+		log.Println("failed to read adjectives", err)
 		return
 	}
 	addCallback("PRIVMSG", "papiez", papiez)
+}
+
+func init() {
+	papiezLock.Lock()
+	log.Println("Defering \"papiez\" initialization")
+	go lazyPapiezInit()
 }

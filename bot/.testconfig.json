@@ -11,5 +11,6 @@
     "NotSeenMessage":"nope, never",
     "DictionaryObjects":".dicts/objects",
     "DictionaryVerbs":".dicts/verbs",
+    "DictionaryAdjectives":".dicts/adjectives",
     "Nick":"gorepost"
 }

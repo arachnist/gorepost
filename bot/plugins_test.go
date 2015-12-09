@@ -258,6 +258,26 @@ var eventTests = []struct {
 		},
 	},
 	{
+		desc: "papież",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":papież",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+				User: "test",
+				Host: "framework",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Papież adjective",
+			},
+		},
+	},
+	{
 		desc: "jan without args",
 		in: irc.Message{
 			Command:  "PRIVMSG",
