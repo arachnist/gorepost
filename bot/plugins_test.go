@@ -392,6 +392,42 @@ var eventTests = []struct {
 		},
 	},
 	{
+		desc: "roll multiple strings",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll string another",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0",
+			},
+		},
+	},
+	{
+		desc: "roll string",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll string",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0",
+			},
+		},
+	},
+	{
 		desc: "roll 0",
 		in: irc.Message{
 			Command:  "PRIVMSG",
