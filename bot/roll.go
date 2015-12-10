@@ -23,27 +23,27 @@ func roll(output func(irc.Message), msg irc.Message) {
 	rolls := 1
 
 	if len(args) == 3 {
-		rolls, err = strconv.Atoi(args[1])
+		rolls, err = strconv.Atoi(args[2])
 		if err != nil || rolls < 1 {
-			output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0"))
+			output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0"))
 			return
 		}
 	} else if len(args) != 2 {
-		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0"))
+		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0"))
 		return
 	}
 
 	sides, err := strconv.Atoi(args[1])
 	if err != nil {
-		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0"))
+		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0"))
 		return
 	}
 	if sides <= 0 {
-		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0"))
+		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0"))
 		return
 	}
 
-	sum := 0
+	sum := rolls
 	for i := 0; i < rolls; i++ {
 		sum += rand.Intn(sides)
 	}

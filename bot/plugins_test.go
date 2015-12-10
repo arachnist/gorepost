@@ -351,7 +351,7 @@ var eventTests = []struct {
 			{
 				Command:  "PRIVMSG",
 				Params:   []string{"#testchan-1"},
-				Trailing: "0",
+				Trailing: "3",
 			},
 		},
 	},
@@ -369,7 +369,7 @@ var eventTests = []struct {
 			{
 				Command:  "PRIVMSG",
 				Params:   []string{"#testchan-1"},
-				Trailing: "0",
+				Trailing: "1",
 			},
 		},
 	},
@@ -387,7 +387,7 @@ var eventTests = []struct {
 			{
 				Command:  "PRIVMSG",
 				Params:   []string{"#testchan-1"},
-				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0",
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0",
 			},
 		},
 	},
@@ -405,7 +405,7 @@ var eventTests = []struct {
 			{
 				Command:  "PRIVMSG",
 				Params:   []string{"#testchan-1"},
-				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0",
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0",
 			},
 		},
 	},
