@@ -337,6 +337,78 @@ var eventTests = []struct {
 			},
 		},
 	},
+	{
+		desc: "roll multiple",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll 1 3",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "0",
+			},
+		},
+	},
+	{
+		desc: "roll single",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll 1",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "0",
+			},
+		},
+	},
+	{
+		desc: "roll too many arguments",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll 0 1 2",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0",
+			},
+		},
+	},
+	{
+		desc: "roll 0",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll 0",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Usage: :roll <sides int> <rolls int>, each roll is [0, n), size has to be >0",
+			},
+		},
+	},
 }
 
 func TestPlugins(t *testing.T) {
