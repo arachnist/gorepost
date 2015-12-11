@@ -42,6 +42,10 @@ func roll(output func(irc.Message), msg irc.Message) {
 		output(reply(msg, "Usage: :roll <sides int> <rolls int>, each roll is [0, n)+1, size has to be >0"))
 		return
 	}
+	if sides > 1000000 || rolls > 1000000 {
+		output(reply(msg, "Number of rolls and dice size is limited to 1000000"))
+		return
+	}
 
 	sum := rolls
 	for i := 0; i < rolls; i++ {

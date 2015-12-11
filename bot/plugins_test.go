@@ -428,6 +428,24 @@ var eventTests = []struct {
 		},
 	},
 	{
+		desc: "roll 1000000",
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":roll 2000000",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		expectedOut: []irc.Message{
+			{
+				Command:  "PRIVMSG",
+				Params:   []string{"#testchan-1"},
+				Trailing: "Number of rolls and dice size is limited to 1000000",
+			},
+		},
+	},
+	{
 		desc: "roll 0",
 		in: irc.Message{
 			Command:  "PRIVMSG",
