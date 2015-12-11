@@ -744,6 +744,71 @@ func TestSeenConditions(t *testing.T) {
 	wg.Wait()
 }
 
+var variableOutputTestEvents = []struct {
+	in       irc.Message
+	outRegex regexp.Regexp
+	function func(func(irc.Message), irc.Message)
+}{
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":kotki",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^http://.*tumblr"),
+		function: kotki,
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":cycki",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^cycki [(]nsfw[)]: http://.*"),
+		function: cycki,
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: ":at",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^at:"),
+		function: at,
+	},
+}
+
+func TestFunctionsWithVariableOutput(t *testing.T) {
+	var wg sync.WaitGroup
+
+	genOutTestFunction := func(regex regexp.Regexp) func(irc.Message) {
+		return func(m irc.Message) {
+			t.Logf("testing regex /%v/ on %+v", regex.String(), m.Trailing)
+			if !regex.Match([]byte(m.Trailing)) {
+				t.Log("Failed", m.Trailing)
+				t.Fail()
+			}
+			wg.Done()
+		}
+	}
+
+	wg.Add(len(variableOutputTestEvents))
+	for _, e := range variableOutputTestEvents {
+		e.function(genOutTestFunction(e.outRegex), e.in)
+	}
+
+	wg.Wait()
+}
+
 func configLookupHelper(map[string]string) []string {
 	return []string{".testconfig.json"}
 }
