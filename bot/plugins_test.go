@@ -257,7 +257,7 @@ var eventTests = []struct {
 			},
 		},
 	},
-	/* {
+	{
 		desc: "papież",
 		in: irc.Message{
 			Command:  "PRIVMSG",
@@ -336,7 +336,7 @@ var eventTests = []struct {
 				Trailing: "Jan Paweł II predicate małe specified-object",
 			},
 		},
-	}, */
+	},
 	{
 		desc: "roll multiple",
 		in: irc.Message{
