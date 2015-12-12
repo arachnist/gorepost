@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 

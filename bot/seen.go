@@ -13,7 +13,6 @@ import (
 
 	"github.com/cloudflare/gokabinet/kt"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 

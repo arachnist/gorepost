@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -34,6 +33,8 @@ func papiez(output func(irc.Message), msg irc.Message) {
 
 func lazyPapiezInit() {
 	defer papiezLock.Unlock()
+	cfgLock.Lock()
+	defer cfgLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
 	adjectives, err = readLines(cfg.LookupString(nil, "DictionaryAdjectives"))

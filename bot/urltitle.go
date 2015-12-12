@@ -12,7 +12,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 

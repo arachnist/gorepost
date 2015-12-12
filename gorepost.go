@@ -11,7 +11,7 @@ import (
 	"path"
 
 	"github.com/arachnist/gorepost/bot"
-	cfg "github.com/arachnist/gorepost/config"
+	"github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -50,7 +50,7 @@ func main() {
 		log.Fatalln("Not a directory:", os.Args[1])
 	}
 
-	cfg.SetFileListBuilder(fileListFuncBuilder(os.Args[1], "common.json"))
+	cfg := config.New(fileListFuncBuilder(os.Args[1], "common.json"))
 
 	logfile, err := os.OpenFile(cfg.LookupString(context, "Logpath"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
@@ -62,10 +62,11 @@ func main() {
 
 	log.Println("Configured networks:", len(networks), networks)
 
+	bot.Initialize(cfg)
 	for i, conn := range make([]irc.Connection, len(networks)) {
 		conn := conn
 		log.Println("Setting up", networks[i], "connection")
-		conn.Setup(bot.Dispatcher, networks[i])
+		conn.Setup(bot.Dispatcher, networks[i], cfg)
 	}
 	<-exit
 }

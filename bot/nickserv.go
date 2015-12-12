@@ -9,7 +9,6 @@ import (
 	"log"
 	"regexp"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 

@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -51,6 +50,8 @@ func jan(output func(irc.Message), msg irc.Message) {
 
 func lazyJanInit() {
 	defer janLock.Unlock()
+	cfgLock.Lock()
+	defer cfgLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
 	objects, err = readLines(cfg.LookupString(nil, "DictionaryObjects"))
