@@ -62,6 +62,7 @@ func main() {
 
 	log.Println("Configured networks:", len(networks), networks)
 
+	bot.Initialize(cfg)
 	for i, conn := range make([]irc.Connection, len(networks)) {
 		conn := conn
 		log.Println("Setting up", networks[i], "connection")
