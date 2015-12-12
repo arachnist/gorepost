@@ -7,7 +7,6 @@ package bot
 import (
 	"strings"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 

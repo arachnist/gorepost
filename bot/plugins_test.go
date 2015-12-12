@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
+	"github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -257,7 +257,7 @@ var eventTests = []struct {
 			},
 		},
 	},
-	{
+	/* {
 		desc: "papież",
 		in: irc.Message{
 			Command:  "PRIVMSG",
@@ -336,7 +336,7 @@ var eventTests = []struct {
 				Trailing: "Jan Paweł II predicate małe specified-object",
 			},
 		},
-	},
+	}, */
 	{
 		desc: "roll multiple",
 		in: irc.Message{
@@ -815,6 +815,9 @@ func configLookupHelper(map[string]string) []string {
 
 func TestMain(m *testing.M) {
 	log.SetOutput(ioutil.Discard)
-	cfg.SetFileListBuilder(configLookupHelper)
 	os.Exit(m.Run())
+}
+
+func init() {
+	Initialize(config.New(configLookupHelper))
 }

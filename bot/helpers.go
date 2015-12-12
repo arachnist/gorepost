@@ -15,7 +15,6 @@ import (
 	"github.com/moovweb/gokogiri"
 	"github.com/moovweb/gokogiri/xpath"
 
-	cfg "github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
