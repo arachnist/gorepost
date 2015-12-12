@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
+	"github.com/arachnist/gorepost/config"
 )
 
 var expectedOutput = []Message{
@@ -105,7 +105,7 @@ func TestSetup(t *testing.T) {
 	go fakeServer(t)
 
 	var conn Connection
-	conn.Setup(fakeDispatcher, "TestNet")
+	conn.Setup(fakeDispatcher, "TestNet", config.New(configLookupHelper))
 
 	time.Sleep(2 * time.Second)
 
@@ -148,7 +148,6 @@ func configLookupHelper(map[string]string) []string {
 }
 
 func TestMain(m *testing.M) {
-	cfg.SetFileListBuilder(configLookupHelper)
 	log.SetOutput(ioutil.Discard)
 	os.Exit(m.Run())
 }

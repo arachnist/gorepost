@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	cfg "github.com/arachnist/gorepost/config"
+	"github.com/arachnist/gorepost/config"
 )
 
 const delim byte = '\n'
@@ -32,6 +32,7 @@ type Connection struct {
 	quitrecv         chan struct{}
 	quitkeeper       chan struct{}
 	l                sync.Mutex
+	cfg              *config.Config
 }
 
 // Sender sends IRC messages to server and logs their contents.
@@ -150,7 +151,7 @@ func (c *Connection) Keeper() {
 			close(c.quitrecv)
 		}
 		c.quitrecv = make(chan struct{}, 1)
-		servers := cfg.LookupStringSlice(context, "Servers")
+		servers := c.cfg.LookupStringSlice(context, "Servers")
 
 		server := servers[rand.Intn(len(servers))]
 		log.Println(c.network, "connecting to", server)
@@ -162,12 +163,12 @@ func (c *Connection) Keeper() {
 			log.Println(c.network, "Initializing IRC connection")
 			c.Sender(Message{
 				Command:  "NICK",
-				Trailing: cfg.LookupString(context, "Nick"),
+				Trailing: c.cfg.LookupString(context, "Nick"),
 			})
 			c.Sender(Message{
 				Command:  "USER",
-				Params:   []string{cfg.LookupString(context, "User"), "0", "*"},
-				Trailing: cfg.LookupString(context, "RealName"),
+				Params:   []string{c.cfg.LookupString(context, "User"), "0", "*"},
+				Trailing: c.cfg.LookupString(context, "RealName"),
 			})
 		} else {
 			log.Println(c.network, "connection error", err.Error())
@@ -178,7 +179,7 @@ func (c *Connection) Keeper() {
 }
 
 // Setup performs initialization tasks.
-func (c *Connection) Setup(dispatcher func(func(Message), Message), network string) {
+func (c *Connection) Setup(dispatcher func(func(Message), Message), network string, config *config.Config) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)
@@ -187,6 +188,7 @@ func (c *Connection) Setup(dispatcher func(func(Message), Message), network stri
 	c.Quit = make(chan struct{}, 1)
 	c.network = network
 	c.dispatcher = dispatcher
+	c.cfg = config
 
 	c.reconnect <- struct{}{}
 	go c.Keeper()
