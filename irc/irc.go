@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/arachnist/gorepost/config"
+	"github.com/arachnist/dyncfg"
 )
 
 const delim byte = '\n'
@@ -32,7 +32,7 @@ type Connection struct {
 	quitrecv         chan struct{}
 	quitkeeper       chan struct{}
 	l                sync.Mutex
-	cfg              *config.Config
+	cfg              *dyncfg.Dyncfg
 }
 
 // Sender sends IRC messages to server and logs their contents.
@@ -179,7 +179,7 @@ func (c *Connection) Keeper() {
 }
 
 // Setup performs initialization tasks.
-func (c *Connection) Setup(dispatcher func(func(Message), Message), network string, config *config.Config) {
+func (c *Connection) Setup(dispatcher func(func(Message), Message), network string, config *dyncfg.Dyncfg) {
 	rand.Seed(time.Now().UnixNano())
 
 	c.reconnect = make(chan struct{}, 1)

@@ -1,14 +1,14 @@
 package bot
 
 import (
-	"github.com/arachnist/gorepost/config"
+	"github.com/arachnist/dyncfg"
 	"sync"
 )
 
-var cfg *config.Config
+var cfg *dyncfg.Dyncfg
 var cfgLock sync.Mutex
 
-func Initialize(config *config.Config) {
+func Initialize(config *dyncfg.Dyncfg) {
 	cfg = config
 	cfgLock.Unlock()
 }

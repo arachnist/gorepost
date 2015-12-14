@@ -10,8 +10,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/arachnist/dyncfg"
 	"github.com/arachnist/gorepost/bot"
-	"github.com/arachnist/gorepost/config"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -50,7 +50,7 @@ func main() {
 		log.Fatalln("Not a directory:", os.Args[1])
 	}
 
-	cfg := config.New(fileListFuncBuilder(os.Args[1], "common.json"))
+	cfg := dyncfg.New(fileListFuncBuilder(os.Args[1], "common.json"))
 
 	logfile, err := os.OpenFile(cfg.LookupString(context, "Logpath"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
