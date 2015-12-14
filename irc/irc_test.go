@@ -17,7 +17,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/arachnist/gorepost/config"
+	"github.com/arachnist/dyncfg"
 )
 
 var expectedOutput = []Message{
@@ -105,7 +105,7 @@ func TestSetup(t *testing.T) {
 	go fakeServer(t)
 
 	var conn Connection
-	conn.Setup(fakeDispatcher, "TestNet", config.New(configLookupHelper))
+	conn.Setup(fakeDispatcher, "TestNet", dyncfg.New(configLookupHelper))
 
 	time.Sleep(2 * time.Second)
 

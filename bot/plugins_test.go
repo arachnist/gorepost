@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/arachnist/gorepost/config"
+	"github.com/arachnist/dyncfg"
 	"github.com/arachnist/gorepost/irc"
 )
 
@@ -819,5 +819,5 @@ func TestMain(m *testing.M) {
 }
 
 func init() {
-	Initialize(config.New(configLookupHelper))
+	Initialize(Dyncfg.New(configLookupHelper))
 }
