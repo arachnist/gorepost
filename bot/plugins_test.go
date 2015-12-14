@@ -819,5 +819,5 @@ func TestMain(m *testing.M) {
 }
 
 func init() {
-	Initialize(Dyncfg.New(configLookupHelper))
+	Initialize(dyncfg.New(configLookupHelper))
 }
