@@ -776,6 +776,18 @@ var variableOutputTestEvents = []struct {
 	{
 		in: irc.Message{
 			Command:  "PRIVMSG",
+			Trailing: ":bonjour",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^bonjour [(]nsfw[)]: http://.*"),
+		function: bonjour,
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
 			Trailing: ":at",
 			Params:   []string{"#testchan-1"},
 			Prefix: &irc.Prefix{

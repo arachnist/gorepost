@@ -1,5 +1,3 @@
-// +build bonjourmadame
-//
 // Copyright 2015 Robert S. Gerus. All rights reserved.
 // Use of this source code is governed by a MIT-style
 // license that can be found in the LICENSE file.
@@ -22,7 +20,10 @@ func bonjour(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	img, err := httpGetXpath("http://www.bonjourmadame.fr/page/"+fmt.Sprintf("%d", rand.Intn(2370)+1), "//div[@class='photo post']//img/@src")
+	t, _ := time.Parse("2006-01-02", "2015-12-01")
+	max := int(time.Now().Sub(t).Hours())/24 + 1
+
+	img, err := httpGetXpath("http://ditesbonjouralamadame.tumblr.com/page/"+fmt.Sprintf("%d", rand.Intn(max)+1), "//div[@class='photo post']//a/@href")
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
 	} else {
