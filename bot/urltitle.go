@@ -41,7 +41,7 @@ func getURLTitle(l string) string {
 func linktitle(output func(irc.Message), msg irc.Message) {
 	var r []string
 
-	for _, s := range strings.Split(msg.Trailing, " ") {
+	for _, s := range strings.Split(strings.Trim(msg.Trailing, "\001"), " ") {
 		if s == "notitle" {
 			return
 		}
