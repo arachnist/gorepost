@@ -809,6 +809,30 @@ var variableOutputTestEvents = []struct {
 		outRegex: *regexp.MustCompile("^at:"),
 		function: at,
 	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up"),
+		function: linktitle,
+	},
+	{
+		in: irc.Message{
+			Command:  "PRIVMSG",
+			Trailing: "http://youtu.be/dQw4w9WgXcQ",
+			Params:   []string{"#testchan-1"},
+			Prefix: &irc.Prefix{
+				Name: "idontexist",
+			},
+		},
+		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up"),
+		function: linktitle,
+	},
 }
 
 func TestFunctionsWithVariableOutput(t *testing.T) {
