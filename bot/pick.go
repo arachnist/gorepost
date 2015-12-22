@@ -13,7 +13,12 @@ import (
 )
 
 func pick(output func(irc.Message), msg irc.Message) {
-	args := strings.Split(msg.Trailing, " ")
+	var args []string
+	if strings.Contains(msg.Trailing, ",") {
+		args = strings.Split(msg.Trailing, ",")
+	} else {
+		args = strings.Split(msg.Trailing, " ")
+	}
 	if args[0] != ":pick" {
 		return
 	}
