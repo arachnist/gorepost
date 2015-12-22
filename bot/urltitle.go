@@ -19,7 +19,7 @@ var trimTitle *regexp.Regexp
 var trimLink *regexp.Regexp
 var enc = charmap.ISO8859_2
 
-func getURLTitle(l string) string {
+func genericURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
 	if err == errElementNotFound {
 		return "no title"
@@ -38,6 +38,16 @@ func getURLTitle(l string) string {
 	return title
 }
 
+var customDataFetchers = []struct {
+	re      *regexp.Regexp
+	fetcher func(l string) string
+}{
+	{
+		re:      regexp.MustCompile(".*"),
+		fetcher: genericURLTitle,
+	},
+}
+
 func linktitle(output func(irc.Message), msg irc.Message) {
 	var r []string
 
@@ -51,9 +61,15 @@ func linktitle(output func(irc.Message), msg irc.Message) {
 		s = string(trimLink.ReplaceAll([]byte(s), []byte("http"))[:])
 
 		if b {
-			t := getURLTitle(s)
-			if t != "no title" {
-				r = append(r, t)
+		FetchersLoop:
+			for _, d := range customDataFetchers {
+				if d.re.MatchString(s) {
+					t := d.fetcher(s)
+					if t != "no title" {
+						r = append(r, t)
+					}
+					break FetchersLoop
+				}
 			}
 		}
 	}
@@ -66,7 +82,7 @@ func linktitle(output func(irc.Message), msg irc.Message) {
 }
 
 func init() {
-	trimTitle, _ = regexp.Compile("[\\s]+")
-	trimLink, _ = regexp.Compile("^.*?http")
+	trimTitle = regexp.MustCompile("[\\s]+")
+	trimLink = regexp.MustCompile("^.*?http")
 	addCallback("PRIVMSG", "LINKTITLE", linktitle)
 }
