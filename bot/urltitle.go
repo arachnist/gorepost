@@ -16,8 +16,8 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
-var trimTitle *regexp.Regexp
-var trimLink *regexp.Regexp
+var trimTitle = regexp.MustCompile("[\\s]+")
+var trimLink = regexp.MustCompile("^.*?http")
 var enc = charmap.ISO8859_2
 
 func youtube(vid string) string {
@@ -124,7 +124,5 @@ func linktitle(output func(irc.Message), msg irc.Message) {
 }
 
 func init() {
-	trimTitle = regexp.MustCompile("[\\s]+")
-	trimLink = regexp.MustCompile("^.*?http")
 	addCallback("PRIVMSG", "LINKTITLE", linktitle)
 }
