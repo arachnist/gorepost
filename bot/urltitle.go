@@ -77,7 +77,7 @@ var customDataFetchers = []struct {
 	fetcher func(l string) string
 }{
 	{
-		re:      regexp.MustCompile("//(www.)?youtube.com/"),
+		re:      regexp.MustCompile("//(www.)?youtube.com/watch"),
 		fetcher: youtubeLong,
 	},
 	{
