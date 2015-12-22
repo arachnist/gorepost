@@ -14,17 +14,19 @@ import (
 
 func pick(output func(irc.Message), msg irc.Message) {
 	var args []string
-	if strings.Contains(msg.Trailing, ",") {
-		args = strings.Split(msg.Trailing, ",")
-	} else {
-		args = strings.Split(msg.Trailing, " ")
-	}
-	if args[0] != ":pick" {
+	if !strings.HasPrefix(msg.Trailing, ":pick ") {
 		return
 	}
 
-	// don't pick :pick
-	choice := args[rand.Intn(len(args)-1)+1]
+	a := strings.TrimPrefix(msg.Trailing, ":pick ")
+
+	if strings.Contains(a, ",") {
+		args = strings.Split(a, ",")
+	} else {
+		args = strings.Fields(a)
+	}
+
+	choice := args[rand.Intn(len(args))]
 
 	output(reply(msg, choice))
 }
