@@ -5,6 +5,7 @@
 package bot
 
 import (
+	"encoding/json"
 	"fmt"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
@@ -19,17 +20,26 @@ var trimTitle *regexp.Regexp
 var trimLink *regexp.Regexp
 var enc = charmap.ISO8859_2
 
-func youtube(l string) string {
-	// get data from
-	// https://www.youtube.com/oembed?format=json&url=http://www.youtube.com/watch?v=dQw4w9WgXcQ
-	return "placeholder"
+func youtube(vid string) string {
+	var dat map[string]interface{}
+	link := fmt.Sprintf("https://www.youtube.com/oembed?format=json&url=http://www.youtube.com/watch?v=%+v", vid)
+	data, err := httpGet(link)
+	if err != nil {
+		return "error getting data from youtube"
+	}
+
+	err = json.Unmarshal(data, &dat)
+	if err != nil {
+		return "error decoding data from youtube"
+	}
+	return dat["title"].(string)
 }
 
 func youtubeLong(l string) string {
 	pattern := regexp.MustCompile(`/watch[?]v[=](?P<vid>[a-zA-Z0-9-_]+)`)
 	res := []byte{}
 	for _, s := range pattern.FindAllSubmatchIndex([]byte(l), -1) {
-		res = pattern.ExpandString(res, "$cmd", l, s)
+		res = pattern.ExpandString(res, "$vid", l, s)
 	}
 	return youtube(string(res))
 }
@@ -38,7 +48,7 @@ func youtubeShort(l string) string {
 	pattern := regexp.MustCompile(`youtu.be/(?P<vid>[a-zA-Z0-9-_]+)`)
 	res := []byte{}
 	for _, s := range pattern.FindAllSubmatchIndex([]byte(l), -1) {
-		res = pattern.ExpandString(res, "$cmd", l, s)
+		res = pattern.ExpandString(res, "$vid", l, s)
 	}
 	return youtube(string(res))
 }
