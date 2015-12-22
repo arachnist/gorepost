@@ -19,6 +19,30 @@ var trimTitle *regexp.Regexp
 var trimLink *regexp.Regexp
 var enc = charmap.ISO8859_2
 
+func youtube(l string) string {
+	// get data from
+	// https://www.youtube.com/oembed?format=json&url=http://www.youtube.com/watch?v=dQw4w9WgXcQ
+	return "placeholder"
+}
+
+func youtubeLong(l string) string {
+	pattern := regexp.MustCompile(`/watch[?]v[=](?P<vid>[a-zA-Z0-9-_]+)`)
+	res := []byte{}
+	for _, s := range pattern.FindAllSubmatchIndex([]byte(l), -1) {
+		res = pattern.ExpandString(res, "$cmd", l, s)
+	}
+	return youtube(string(res))
+}
+
+func youtubeShort(l string) string {
+	pattern := regexp.MustCompile(`youtu.be/(?P<vid>[a-zA-Z0-9-_]+)`)
+	res := []byte{}
+	for _, s := range pattern.FindAllSubmatchIndex([]byte(l), -1) {
+		res = pattern.ExpandString(res, "$cmd", l, s)
+	}
+	return youtube(string(res))
+}
+
 func genericURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
 	if err == errElementNotFound {
@@ -42,6 +66,14 @@ var customDataFetchers = []struct {
 	re      *regexp.Regexp
 	fetcher func(l string) string
 }{
+	{
+		re:      regexp.MustCompile("//(www.)?youtube.com)/"),
+		fetcher: youtubeLong,
+	},
+	{
+		re:      regexp.MustCompile("//youtu.be/"),
+		fetcher: youtubeShort,
+	},
 	{
 		re:      regexp.MustCompile(".*"),
 		fetcher: genericURLTitle,
