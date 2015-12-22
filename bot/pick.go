@@ -20,7 +20,9 @@ func pick(output func(irc.Message), msg irc.Message) {
 
 	a := strings.TrimPrefix(msg.Trailing, ":pick ")
 
-	if strings.Contains(a, ",") {
+	if strings.Contains(a, ", ") {
+		args = strings.Split(a, ", ")
+	} else if strings.Contains(a, ",") {
 		args = strings.Split(a, ",")
 	} else {
 		args = strings.Fields(a)
