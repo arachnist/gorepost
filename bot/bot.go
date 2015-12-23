@@ -6,13 +6,20 @@ import (
 )
 
 var cfg *dyncfg.Dyncfg
-var cfgLock sync.Mutex
+var initLock sync.Mutex
+var initList []func()
+
+func addInit(f func()) {
+	initLock.Lock()
+	defer initLock.Unlock()
+
+	initList = append(initList, f)
+}
 
 func Initialize(config *dyncfg.Dyncfg) {
 	cfg = config
-	cfgLock.Unlock()
-}
 
-func init() {
-	cfgLock.Lock()
+	for _, f := range initList {
+		f()
+	}
 }

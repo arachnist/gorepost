@@ -93,12 +93,12 @@ func seen(output func(irc.Message), msg irc.Message) {
 	output(reply(msg, r))
 }
 
-func init() {
+func seenInit() {
 	var err error
-	var ktHost = "127.0.0.1"
-	var ktPort = 1337
+	var ktHost = cfg.LookupString(nil, "KTHost")
+	var ktPort = cfg.LookupInt(nil, "KTPort")
 
-	log.Println("SEEN: connecting to KT")
+	log.Println("seen: connecting to KT")
 	k, err = kt.NewConn(ktHost, ktPort, 4, 2*time.Second)
 	if err != nil {
 		log.Println("error connecting to kyoto tycoon", err)
@@ -112,4 +112,9 @@ func init() {
 	addCallback("PART", "seenrecord", seenrecord)
 	addCallback("QUIT", "seenrecord", seenrecord)
 	addCallback("NOTICE", "seenrecord", seenrecord)
+}
+
+func init() {
+	log.Println("Defering \"papiez\" initialization")
+	addInit(seenInit)
 }
