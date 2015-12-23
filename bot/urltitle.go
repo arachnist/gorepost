@@ -99,7 +99,7 @@ func fourchanscrape(l string) string {
 		return "error while correcting permisions"
 	}
 
-	return path.Join(cfg.LookupString(nil, "FourChanLinkBase"), filename)
+	return cfg.LookupString(nil, "FourChanLinkBase") + "/" + filename
 }
 
 func genericURLTitle(l string) string {
