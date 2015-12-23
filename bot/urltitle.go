@@ -5,10 +5,16 @@
 package bot
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/transform"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"os"
+	"path"
 	"regexp"
 	"strings"
 	"unicode/utf8"
@@ -53,6 +59,44 @@ func youtubeShort(l string) string {
 	return youtube(string(res))
 }
 
+func fourchanscrape(l string) string {
+	h := sha1.New()
+	t, e := ioutil.TempFile("", "4scrape_")
+	ext := path.Ext(l)
+	if e != nil {
+		return "error creating temp file"
+	}
+	multiwriter := io.MultiWriter(h, t)
+
+	response, err := http.Get(l)
+	if err != nil {
+		return "error while downloading url"
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode != 200 {
+		return "no title"
+	}
+
+	_, err = io.Copy(multiwriter, response.Body)
+	if err != nil {
+		return "error while reading response"
+	}
+
+	old := t.Name()
+	t.Close()
+
+	filename := fmt.Sprintf("%x%s", h.Sum(nil), ext)
+	dest := path.Join(cfg.LookupString(nil, "FourChanDir"), filename)
+
+	err = os.Rename(old, dest)
+	if err != nil {
+		return "error while renaming tempfile"
+	}
+
+	return path.Join(cfg.LookupString(nil, "FourChanLinkBase"), filename)
+}
+
 func genericURLTitle(l string) string {
 	title, err := httpGetXpath(l, "//head/title")
 	if err == errElementNotFound {
@@ -83,6 +127,10 @@ var customDataFetchers = []struct {
 	{
 		re:      regexp.MustCompile("//youtu.be/"),
 		fetcher: youtubeShort,
+	},
+	{
+		re:      regexp.MustCompile("//i[.]4cdn[.]org/"),
+		fetcher: fourchanscrape,
 	},
 	{
 		re:      regexp.MustCompile(".*"),
