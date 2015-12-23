@@ -288,12 +288,36 @@ func (m *Message) Bytes() []byte {
 		buffer.WriteString(m.Trailing)
 	}
 
-	// We need the limit the buffer length.
-	if buffer.Len() > (maxLength) {
-		buffer.Truncate(maxLength)
+	return buffer.Bytes()
+}
+
+func (m *Message) WireLen() int {
+
+	buffer := new(bytes.Buffer)
+
+	// Message prefix
+	if m.Prefix != nil {
+		buffer.WriteByte(prefix)
+		m.Prefix.writeTo(buffer)
+		buffer.WriteByte(space)
 	}
 
-	return buffer.Bytes()
+	// Command is required
+	buffer.WriteString(m.Command)
+
+	// Space separated list of arguments
+	if len(m.Params) > 0 {
+		buffer.WriteByte(space)
+		buffer.WriteString(strings.Join(m.Params, string(space)))
+	}
+
+	if len(m.Trailing) > 0 || m.EmptyTrailing {
+		buffer.WriteByte(space)
+		buffer.WriteByte(prefix)
+		buffer.WriteString(m.Trailing)
+	}
+
+	return buffer.Len()
 }
 
 // String returns a string representation of this message.

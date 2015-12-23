@@ -11,6 +11,7 @@ import (
 	"net"
 	"sync"
 	"time"
+	"unicode/utf8"
 
 	"github.com/arachnist/dyncfg"
 )
@@ -39,9 +40,28 @@ type Connection struct {
 func (c *Connection) Sender(msg Message) {
 	c.l.Lock()
 	defer c.l.Unlock()
-	c.writer.WriteString(msg.String() + endline)
-	log.Println(c.network, "-->", msg.String())
-	c.writer.Flush()
+	if msg.WireLen() > maxLength {
+		currLen := 0
+		for i, ch := range msg.String() {
+			currLen += utf8.RuneLen(ch)
+			if currLen > maxLength {
+				c.writer.WriteString(msg.String()[:i] + endline)
+				log.Println(c.network, "-->", msg.String())
+				c.writer.Flush()
+				// eh, it is a bit naive to assume that we won't explode again…
+				if msg.Command == "PRIVMSG" { // we don't care otherwise
+					newMsg := msg
+					newMsg.Trailing = "Message truncated"
+					go c.Sender(newMsg)
+				}
+				return
+			}
+		}
+	} else {
+		c.writer.WriteString(msg.String() + endline)
+		log.Println(c.network, "-->", msg.String())
+		c.writer.Flush()
+	}
 }
 
 // Receiver receives IRC messages from server, logs their contents, sets message
