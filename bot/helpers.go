@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"os"
 	"time"
 
@@ -22,11 +23,15 @@ var errElementNotFound = errors.New("element not found in document")
 
 func httpGet(link string) ([]byte, error) {
 	var buf []byte
+	cj, err := cookiejar.New(nil)
 	tr := &http.Transport{
 		TLSHandshakeTimeout:   20 * time.Second,
 		ResponseHeaderTimeout: 20 * time.Second,
 	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{
+		Transport: tr,
+		Jar:       cj,
+	}
 
 	req, err := http.NewRequest("GET", link, nil)
 	if err != nil {
