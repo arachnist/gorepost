@@ -115,6 +115,6 @@ func seenInit() {
 }
 
 func init() {
-	log.Println("Defering \"papiez\" initialization")
+	log.Println("Defering \"seen\" initialization")
 	addInit(seenInit)
 }
