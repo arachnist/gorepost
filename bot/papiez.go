@@ -8,14 +8,12 @@ import (
 	"log"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/arachnist/gorepost/irc"
 )
 
 var adjectives []string
-var papiezLock sync.RWMutex
 
 func papiez(output func(irc.Message), msg irc.Message) {
 	args := strings.Split(msg.Trailing, " ")
@@ -23,18 +21,12 @@ func papiez(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	papiezLock.RLock()
-	defer papiezLock.RUnlock()
-
 	choice := "Papież " + adjectives[rand.Intn(len(adjectives))]
 
 	output(reply(msg, choice))
 }
 
 func lazyPapiezInit() {
-	defer papiezLock.Unlock()
-	cfgLock.Lock()
-	defer cfgLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
 	adjectives, err = readLines(cfg.LookupString(nil, "DictionaryAdjectives"))
@@ -46,7 +38,6 @@ func lazyPapiezInit() {
 }
 
 func init() {
-	papiezLock.Lock()
 	log.Println("Defering \"papiez\" initialization")
-	go lazyPapiezInit()
+	addInit(lazyPapiezInit)
 }

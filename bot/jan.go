@@ -8,7 +8,6 @@ import (
 	"log"
 	"math/rand"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/arachnist/gorepost/irc"
@@ -16,16 +15,12 @@ import (
 
 var objects []string
 var predicates []string
-var janLock sync.RWMutex
 
 func jan(output func(irc.Message), msg irc.Message) {
 	args := strings.Split(msg.Trailing, " ")
 	if args[0] != ":jan" {
 		return
 	}
-
-	janLock.RLock()
-	defer janLock.RUnlock()
 
 	var predicate string
 	var object string
@@ -49,9 +44,6 @@ func jan(output func(irc.Message), msg irc.Message) {
 }
 
 func lazyJanInit() {
-	defer janLock.Unlock()
-	cfgLock.Lock()
-	defer cfgLock.Unlock()
 	var err error
 	rand.Seed(time.Now().UnixNano())
 	objects, err = readLines(cfg.LookupString(nil, "DictionaryObjects"))
@@ -68,7 +60,6 @@ func lazyJanInit() {
 }
 
 func init() {
-	janLock.Lock()
 	log.Println("Defering \"jan\" initialization")
-	go lazyJanInit()
+	addInit(lazyJanInit)
 }

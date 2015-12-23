@@ -12,5 +12,7 @@
     "DictionaryObjects":".dicts/objects",
     "DictionaryVerbs":".dicts/verbs",
     "DictionaryAdjectives":".dicts/adjectives",
+    "KTHost":"127.0.0.1",
+    "KTPort":1337,
     "Nick":"gorepost"
 }
