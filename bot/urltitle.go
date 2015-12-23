@@ -94,6 +94,11 @@ func fourchanscrape(l string) string {
 		return "error while renaming tempfile"
 	}
 
+	err = os.Chmod(dest, 0644)
+	if err != nil {
+		return "error while correcting permisions"
+	}
+
 	return path.Join(cfg.LookupString(nil, "FourChanLinkBase"), filename)
 }
 
