@@ -288,6 +288,11 @@ func (m *Message) Bytes() []byte {
 		buffer.WriteString(m.Trailing)
 	}
 
+	// We need the limit the buffer length.
+	if buffer.Len() > (maxLength) {
+		buffer.Truncate(maxLength)
+	}
+
 	return buffer.Bytes()
 }
 
