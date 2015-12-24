@@ -818,7 +818,7 @@ var variableOutputTestEvents = []struct {
 				Name: "idontexist",
 			},
 		},
-		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up"),
+		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up by RickAstleyVEVO$"),
 		function: linktitle,
 	},
 	{
@@ -830,7 +830,7 @@ var variableOutputTestEvents = []struct {
 				Name: "idontexist",
 			},
 		},
-		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up"),
+		outRegex: *regexp.MustCompile("^↳ title: Rick Astley - Never Gonna Give You Up by RickAstleyVEVO$"),
 		function: linktitle,
 	},
 }

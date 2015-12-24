@@ -38,7 +38,7 @@ func youtube(vid string) string {
 	if err != nil {
 		return "error decoding data from youtube"
 	}
-	return dat["title"].(string)
+	return fmt.Sprint(dat["title"].(string), " by ", dat["author_name"].(string))
 }
 
 func youtubeLong(l string) string {
