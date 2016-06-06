@@ -134,7 +134,7 @@ var customDataFetchers = []struct {
 		fetcher: youtubeShort,
 	},
 	{
-		re:      regexp.MustCompile("//i[.]4cdn[.]org/"),
+		re:      regexp.MustCompile("//(i[.]4cdn[.]org|goto11[.]pl)/"),
 		fetcher: fourchanscrape,
 	},
 	{
