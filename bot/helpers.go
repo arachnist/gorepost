@@ -13,8 +13,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/moovweb/gokogiri"
-	"github.com/moovweb/gokogiri/xpath"
+	"github.com/jbowtie/gokogiri"
+	"github.com/jbowtie/gokogiri/xpath"
 
 	"github.com/arachnist/gorepost/irc"
 )
