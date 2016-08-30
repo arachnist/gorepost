@@ -94,16 +94,11 @@ func seen(output func(irc.Message), msg irc.Message) {
 }
 
 func seenInit() {
-	var err error
 	var ktHost = cfg.LookupString(nil, "KTHost")
 	var ktPort = cfg.LookupInt(nil, "KTPort")
 
 	log.Println("seen: connecting to KT")
-	k, err = kt.NewConn(ktHost, ktPort, 4, 2*time.Second)
-	if err != nil {
-		log.Println("error connecting to kyoto tycoon", err)
-		return
-	}
+	k = kt.NewConn(ktHost, ktPort, 4, 2*time.Second)
 
 	log.Println("Registering callbacks")
 	addCallback("PRIVMSG", "seen", seen)
