@@ -13,6 +13,20 @@ import (
 	"github.com/arachnist/gorepost/irc"
 )
 
+func getPicDate() time.Time {
+	for {
+		now := time.Now()
+		epoch := time.Date(2018, time.December, 10, 0, 0, 0, 0, time.UTC)
+		delta := now.Sub(epoch)
+		r := rand.Int63n(int64(delta.Seconds()))
+		newdate := epoch.Add(time.Duration(r) * time.Second)
+		if newdate.Weekday() == 0 || newdate.Weekday() == 6 {
+			continue
+		}
+		return newdate
+	}
+}
+
 func bonjour(output func(irc.Message), msg irc.Message) {
 	var rmsg string
 
@@ -20,10 +34,9 @@ func bonjour(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	t, _ := time.Parse("2006-01-02", "2015-12-01")
-	max := int(time.Now().Sub(t).Hours())/24 + 1
-
-	img, err := httpGetXpath("http://ditesbonjouralamadame.tumblr.com/page/"+fmt.Sprintf("%d", rand.Intn(max)+1), "//div[@class='photo post']//a/@href")
+	d := GetPicDate()
+	year, month, day = d.Date()
+	img, err := httpGetXpath("http://www.bonjourmadame.fr/"+fmt.Sprintf("%d/%d/%d/", year, month, day), "//div[@class='post-content']//p/img/@src")
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
 	} else {
