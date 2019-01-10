@@ -34,8 +34,8 @@ func bonjour(output func(irc.Message), msg irc.Message) {
 		return
 	}
 
-	d := GetPicDate()
-	year, month, day = d.Date()
+	d := getPicDate()
+	year, month, day := d.Date()
 	img, err := httpGetXpath("http://www.bonjourmadame.fr/"+fmt.Sprintf("%d/%d/%d/", year, month, day), "//div[@class='post-content']//p/img/@src")
 	if err != nil {
 		rmsg = fmt.Sprint("error:", err)
